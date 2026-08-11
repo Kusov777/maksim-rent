@@ -149,6 +149,62 @@ main[hidden] { display: none; }
 }
 .nav a:hover::after { right: 0; }
 .header-contacts { display: flex; align-items: center; gap: 10px; }
+
+/* мобильное меню-«бургер» (видно только на ≤720px) */
+.burger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 44px;
+  height: 44px;
+  padding: 10px;
+  margin-left: auto;
+  border-radius: 10px;
+}
+.burger span {
+  display: block;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--ink);
+  transition: transform 0.22s ease, opacity 0.22s ease;
+}
+.burger.is-open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.burger.is-open span:nth-child(2) { opacity: 0; }
+.burger.is-open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+.mobile-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  flex-direction: column;
+  background: var(--card);
+  border-bottom: 1px solid var(--hairline);
+  box-shadow: 0 18px 40px -18px rgba(36, 28, 18, 0.35);
+  padding: 4px 20px 18px;
+  opacity: 0;
+  transform: translateY(-10px);
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.mobile-menu.is-open { opacity: 1; transform: none; pointer-events: auto; }
+.mobile-menu > a {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--hairline);
+  font-weight: 600;
+  font-size: 17px;
+}
+.mobile-menu > a:active { color: var(--accent); }
+.mobile-menu-contacts {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding-top: 14px;
+  font-size: 14.5px;
+  color: var(--ink-soft);
+}
+.mobile-menu-contacts a { font-weight: 700; color: var(--ink); }
 .header-phone { font-weight: 700; font-size: 15px; white-space: nowrap; }
 .header-phone:hover { color: var(--accent); }
 .icon-btn {
@@ -824,6 +880,8 @@ section[id] { scroll-margin-top: 76px; }
 @media (max-width: 720px) {
   .header { gap: 12px; }
   .nav { display: none; }
+  .burger { display: inline-flex; }
+  .mobile-menu { display: flex; }
   .hero { min-height: auto; }
   .hero-content { padding-top: 56px; padding-bottom: 46px; }
   .search-card { flex-direction: column; align-items: stretch; }

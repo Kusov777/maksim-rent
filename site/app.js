@@ -769,9 +769,36 @@ function hydrateStatic() {
   }
 }
 
+/* ---------- Мобильное меню ---------- */
+function initMobileMenu() {
+  const burger = document.querySelector('#burger');
+  const menu = document.querySelector('#mobile-menu');
+  if (!burger || !menu) return;
+  const setOpen = open => {
+    menu.classList.toggle('is-open', open);
+    burger.classList.toggle('is-open', open);
+    burger.setAttribute('aria-expanded', String(open));
+  };
+  burger.addEventListener('click', e => {
+    e.stopPropagation();
+    setOpen(!menu.classList.contains('is-open'));
+  });
+  menu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => setOpen(false)));
+  document.addEventListener('click', e => {
+    if (menu.classList.contains('is-open') && !menu.contains(e.target) && !burger.contains(e.target)) setOpen(false);
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && menu.classList.contains('is-open')) {
+      setOpen(false);
+      burger.focus();
+    }
+  });
+}
+
 /* ---------- Инициализация ---------- */
 document.addEventListener('DOMContentLoaded', () => {
   hydrateStatic();
+  initMobileMenu();
   initHero();
   renderCatalog();
   renderRatings();
