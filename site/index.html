@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>У Максима — посуточные квартиры в Санкт-Петербурге напрямую от хозяина</title>
+  <meta name="description" content="5 квартир посуточно в Петербурге напрямую от хозяина: без комиссий и сервисных сборов, календарь занятости онлайн, бронирование в WhatsApp и Telegram за 30 секунд. Отчётные документы для командировочных.">
+  <meta property="og:title" content="У Максима — посуточные квартиры в Санкт-Петербурге">
+  <meta property="og:description" content="Напрямую от хозяина: без комиссий, живой календарь занятости, заявка в мессенджер за 30 секунд.">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:site_name" content="У Максима">
+  <meta property="og:image" content="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=80">
+  <meta name="twitter:card" content="summary_large_image">
+  <!-- После привязки домена добавить:
+       <link rel="canonical" href="https://ваш-домен/">
+       <meta property="og:url" content="https://ваш-домен/"> -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='80' font-size='80'>🗝️</text></svg>">
+  <link rel="preload" href="fonts/prata-v22-cyrillic_latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/golos-text-v7-cyrillic_latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" as="image" href="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=2000&q=80">
+  <link rel="stylesheet" href="styles.css">
+  <!-- Яндекс.Метрика: когда Максим заведёт счётчик, вставить сюда стандартный сниппет
+       и прописать его номер в data.js → SITE.metrikaId. Цели уже размечены в коде:
+       booking_whatsapp, booking_telegram, booking_call, header_whatsapp, header_telegram, header_call -->
+</head>
+<body>
+
+  <header class="header">
+    <a class="wordmark" href="#/">
+      <svg class="wordmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.5 11h2.7v9.5h5.3v-6h3v6h5.3V11h2.7L12 3z"/></svg>
+      <span>У&nbsp;Максима</span>
+    </a>
+    <nav class="nav" aria-label="Основная навигация">
+      <a href="#catalog">Квартиры</a>
+      <a href="#why">Почему напрямую</a>
+      <a href="#reviews">Отзывы</a>
+      <a href="#business">Командировочным</a>
+      <a href="#faq">Вопросы</a>
+    </nav>
+    <div class="header-contacts">
+      <a class="header-phone" data-href-tel data-track="header_call" href="#"><span data-site="phone"></span></a>
+      <a class="icon-btn icon-wa" data-href-wa data-track="header_whatsapp" href="#" target="_blank" rel="noopener" aria-label="Написать в WhatsApp">
+        <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 2a8 8 0 1 1-4.1 14.9l-.3-.2-2.4.6.7-2.3-.2-.4A8 8 0 0 1 12 4zm-3 3.8c-.2 0-.5 0-.7.3-.2.3-.9.9-.9 2.1s.9 2.4 1 2.6c.1.2 1.8 2.9 4.5 3.9 2.2.9 2.7.7 3.2.7.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2l-.4-.2-1.5-.7c-.2-.1-.4-.1-.5.1l-.7.9c-.1.2-.3.2-.5.1-.7-.3-1.5-.7-2.2-1.4-.6-.5-1-1.2-1.3-1.7-.1-.2 0-.4.1-.5l.5-.6c.1-.2.1-.3.2-.5v-.5L10 8.2c-.2-.4-.4-.4-.6-.4H9z"/></svg>
+      </a>
+      <a class="icon-btn icon-tg" data-href-tg data-track="header_telegram" href="#" target="_blank" rel="noopener" aria-label="Написать в Telegram">
+        <svg viewBox="0 0 24 24"><path d="M21.9 4.1c.3-1.1-.4-1.6-1.2-1.3L2.7 9.7c-1.1.4-1.1 1.1-.2 1.4l4.6 1.4 10.7-6.7c.5-.3 1-.2.6.2l-8.7 7.8-.3 4.8c.5 0 .7-.2 1-.5l2.3-2.2 4.8 3.5c.9.5 1.5.2 1.7-.8l3.1-14.5z"/></svg>
+      </a>
+    </div>
+  </header>
+
+  <main id="home-view">
+
+    <!-- ============ HERO ============ -->
+    <section class="hero">
+      <div class="hero-bg" role="img" aria-label="Гостиная одной из квартир"></div>
+      <div class="hero-content">
+        <p class="hero-eyebrow">Санкт-Петербург · напрямую от хозяина</p>
+        <h1 class="hero-title">Квартиры посуточно —<br>без посредников <em>и&nbsp;без&nbsp;комиссий</em></h1>
+        <p class="hero-sub">Пять моих квартир рядом с метро — от Невского до Московского проспекта.
+          Цена на сайте — окончательная: никаких сервисных сборов, а на любой вопрос отвечаю я сам, а не колл-центр.</p>
+
+        <div class="search-card">
+          <button class="search-field" id="hero-dates-toggle" type="button" aria-haspopup="dialog" aria-expanded="false">
+            <span class="search-label">Заезд — выезд</span>
+            <span class="search-value is-placeholder" id="hero-dates-label">Выберите даты</span>
+          </button>
+          <div class="search-field search-guests">
+            <span class="search-label">Гостей</span>
+            <div class="stepper">
+              <button data-guests="-1" type="button" aria-label="Меньше гостей">−</button>
+              <b id="hero-guests-num">2</b>
+              <button data-guests="1" type="button" aria-label="Больше гостей">+</button>
+            </div>
+          </div>
+          <a class="btn btn-accent search-btn" href="#catalog">Показать квартиры</a>
+          <div class="popover" id="hero-cal-popover" role="dialog" aria-label="Выбор дат">
+            <div id="hero-cal"></div>
+            <div class="popover-actions">
+              <button class="link-btn" id="hero-cal-clear" type="button">Сбросить</button>
+              <button class="btn btn-accent btn-sm" id="hero-cal-done" type="button">Готово</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-stats">
+          <div class="stat"><b id="stat-years"></b><span>сдаю квартиры сам</span></div>
+          <div class="stat"><b data-site="guestsHosted"></b><span>гостей принял с <span data-site="yearsSince"></span> года</span></div>
+          <div class="stat"><b id="stat-rating"></b><span>средний рейтинг на площадках</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ КАТАЛОГ ============ -->
+    <section class="section" id="catalog">
+      <div class="section-head reveal">
+        <p class="section-eyebrow">Каталог</p>
+        <h2 class="section-title">Пять квартир — все мои,<br>других не бывает</h2>
+        <p class="section-sub">Каждую квартиру я обставлял сам и знаю в ней каждый угол.
+          На фото — именно та квартира, в которую вы заедете. Выберите даты выше — покажу, что свободно, и посчитаю итог.</p>
+      </div>
+      <div class="catalog-grid" id="catalog-grid"></div>
+    </section>
+
+    <!-- ============ ПОЧЕМУ НАПРЯМУЮ ============ -->
+    <section class="section section-why" id="why">
+      <div class="section-head reveal">
+        <p class="section-eyebrow">Почему напрямую</p>
+        <h2 class="section-title">Что меняется, когда нет посредника</h2>
+      </div>
+      <div class="why-grid">
+        <div class="why-item reveal">
+          <span class="why-num">01</span>
+          <h3>Цена без наценки агрегатора</h3>
+          <p>Площадки добавляют к тарифу хозяина комиссию и «сервисный сбор». Здесь вы платите ровно мой тариф — итог на сайте не изменится при заселении.</p>
+        </div>
+        <div class="why-item reveal">
+          <span class="why-num">02</span>
+          <h3>Живой календарь и честный итог</h3>
+          <p>Занятость каждой квартиры видна прямо на сайте, стоимость считается сразу — со скидками за длительность и доплатами, до копейки.</p>
+        </div>
+        <div class="why-item reveal">
+          <span class="why-num">03</span>
+          <h3>Хозяин на связи, а не колл-центр</h3>
+          <p>Ранний заезд, поздний выезд, забытая зарядка, совет, куда сходить вечером — решается сообщением мне лично, обычно за 15–30 минут.</p>
+        </div>
+        <div class="why-item reveal">
+          <span class="why-num">04</span>
+          <h3>Договор и чек — всё официально</h3>
+          <p>С каждым гостем заключаю договор найма и выдаю чек. Для командировочных — полный пакет отчётных документов.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ О ХОЗЯИНЕ ============ -->
+    <section class="section section-host" id="host">
+      <div class="host-card reveal">
+        <div class="host-photo">
+          <!-- ЗАМЕНИТЬ: сюда реальное фото Максима (см. README) -->
+          <div class="host-avatar host-avatar-big" aria-hidden="true">М</div>
+        </div>
+        <div class="host-text">
+          <p class="section-eyebrow">Кто сдаёт</p>
+          <h2 class="section-title">Я Максим. Это мои квартиры,<br>и сдаю я их сам</h2>
+          <p>С 2020 года — без управляющей компании и посредников. Сам встречаю гостей, сам слежу за чистотой,
+            сам отвечаю в мессенджерах <span data-site="workHours"></span>. Если что-то не так — вы пишете не в поддержку, а человеку, который может это исправить сегодня.</p>
+          <p class="host-legal"><span data-site="legalStatus"></span> · все брони — по договору найма, с чеком.</p>
+          <div class="host-actions">
+            <a class="btn btn-wa" data-href-wa data-track="host_whatsapp" href="#" target="_blank" rel="noopener">Задать вопрос в WhatsApp</a>
+            <a class="btn btn-ghost" data-href-tg data-track="host_telegram" href="#" target="_blank" rel="noopener">Или в Telegram</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ ОТЗЫВЫ ============ -->
+    <section class="section" id="reviews">
+      <div class="section-head reveal">
+        <p class="section-eyebrow">Отзывы</p>
+        <h2 class="section-title">Что пишут гости на площадках</h2>
+        <p class="section-sub">Рейтинги — с сервисов, где эти же квартиры сдаются не первый год. Каждая цифра проверяется по ссылке.</p>
+      </div>
+      <div class="ratings-row reveal" id="ratings-row"></div>
+      <div class="reviews-track" id="reviews-track"></div>
+    </section>
+
+    <!-- ============ КОМАНДИРОВОЧНЫМ ============ -->
+    <section class="section section-business" id="business">
+      <div class="business-inner reveal">
+        <div>
+          <p class="section-eyebrow">Командировочным</p>
+          <h2 class="section-title">Полный пакет отчётных документов — без напоминаний</h2>
+          <p>Живёте как дома, отчитываетесь как в отеле. Сразу при заселении выдаю всё, что примет ваша бухгалтерия:</p>
+          <ul class="docs-list">
+            <li><b>Чек</b> — официальный, из приложения «Мой налог»</li>
+            <li><b>Договор краткосрочного найма</b> — с датами, суммой и реквизитами</li>
+            <li><b>Акт</b> — по запросу, если требует ваша форма отчётности</li>
+          </ul>
+          <p class="business-note">Оплата переводом или наличными — чек в любом случае. Нужен счёт на организацию — обсудим, напишите.</p>
+          <a class="btn btn-accent" data-href-wa data-wa-text="Здравствуйте, Максим! Я в командировку — расскажите, какие отчётные документы вы выдаёте и как оформляется бронь." data-track="business_whatsapp" href="#" target="_blank" rel="noopener">Уточнить по документам</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ FAQ ============ -->
+    <section class="section section-faq" id="faq">
+      <div class="section-head reveal">
+        <p class="section-eyebrow">Вопросы</p>
+        <h2 class="section-title">Всё, что обычно спрашивают</h2>
+      </div>
+      <div class="faq-list" id="faq-list"></div>
+    </section>
+
+    <!-- ============ ФИНАЛЬНЫЙ CTA ============ -->
+    <section class="section section-cta">
+      <div class="cta-card reveal">
+        <h2 class="section-title">Выбирайте даты — отвечу за <span data-site="responseTime"></span></h2>
+        <p>Или просто напишите, что вам нужно: сколько гостей, какие даты, что важно. Подберу квартиру сам.</p>
+        <div class="cta-actions">
+          <a class="btn btn-wa" data-href-wa data-track="cta_whatsapp" href="#" target="_blank" rel="noopener">Написать в WhatsApp</a>
+          <a class="btn btn-tg" data-href-tg data-track="cta_telegram" href="#" target="_blank" rel="noopener">Написать в Telegram</a>
+          <a class="btn btn-ghost" data-href-tel data-track="cta_call" href="#">Позвонить</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <main id="apt-view" hidden></main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-col">
+        <a class="wordmark wordmark-footer" href="#/">
+          <svg class="wordmark-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.5 11h2.7v9.5h5.3v-6h3v6h5.3V11h2.7L12 3z"/></svg>
+          <span>У&nbsp;Максима</span>
+        </a>
+        <p data-site="tagline"></p>
+      </div>
+      <div class="footer-col">
+        <b>Навигация</b>
+        <a href="#catalog">Квартиры</a>
+        <a href="#why">Почему напрямую</a>
+        <a href="#reviews">Отзывы</a>
+        <a href="#business">Командировочным</a>
+        <a href="#faq">Вопросы</a>
+      </div>
+      <div class="footer-col">
+        <b>Связь</b>
+        <a data-href-tel data-track="footer_call" href="#"><span data-site="phone"></span></a>
+        <a data-href-wa data-track="footer_whatsapp" href="#" target="_blank" rel="noopener">WhatsApp</a>
+        <a data-href-tg data-track="footer_telegram" href="#" target="_blank" rel="noopener">Telegram</a>
+        <span data-site="workHours"></span>
+      </div>
+      <div class="footer-col footer-legal">
+        <b>Реквизиты</b>
+        <span><span data-site="legalStatus"></span></span>
+        <span>ИНН <span data-site="inn"></span></span>
+        <span>Заезд с <span data-site="checkIn"></span>, выезд до <span data-site="checkOut"></span></span>
+      </div>
+    </div>
+    <p class="footer-bottom">© <span id="footer-year">2026</span> У Максима · Точные адреса квартир сообщаются после подтверждения брони</p>
+  </footer>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+  <script>document.getElementById('footer-year').textContent = new Date().getFullYear();</script>
+</body>
+</html>

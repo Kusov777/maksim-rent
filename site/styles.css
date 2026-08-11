@@ -1,0 +1,844 @@
+/* =========================================================
+   У Максима — посуточные квартиры
+   Тёплый «петербургский» editorial: бумага, чернила, терракота.
+   ========================================================= */
+
+/* шрифты хостятся локально — не зависим от доступности Google-доменов */
+@font-face {
+  font-family: 'Prata';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('fonts/prata-v22-cyrillic_latin-regular.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Golos Text';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('fonts/golos-text-v7-cyrillic_latin-regular.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Golos Text';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('fonts/golos-text-v7-cyrillic_latin-500.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Golos Text';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('fonts/golos-text-v7-cyrillic_latin-600.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Golos Text';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('fonts/golos-text-v7-cyrillic_latin-700.woff2') format('woff2');
+}
+
+:root {
+  --paper: #f7f1e6;
+  --paper-2: #efe6d6;
+  --card: #fffcf5;
+  --ink: #241c12;
+  --ink-soft: #5c5244;
+  --ink-faint: #6f6555;
+  --accent: #ad4520;
+  --accent-dark: #8f3a15;
+  --accent-soft: #f3d9cc;
+  --gold: #b98a41;
+  --dark: #211a12;
+  --dark-2: #2c231a;
+  --cream-on-dark: #f3ead9;
+  --green: #1a6f45;
+  --wa: #12834a;
+  --tg: #1f78a6;
+  --red: #a83232;
+  --hairline: rgba(36, 28, 18, 0.14);
+  --radius: 14px;
+  --shadow: 0 18px 50px -18px rgba(36, 28, 18, 0.35);
+  --font-display: 'Prata', 'Georgia', serif;
+  --font-body: 'Golos Text', 'Segoe UI', sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-body);
+  background: var(--paper);
+  color: var(--ink);
+  line-height: 1.65;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+}
+img { display: block; max-width: 100%; }
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; font-size: inherit; cursor: pointer; background: none; border: none; color: inherit; }
+main { display: block; }
+main[hidden] { display: none; }
+
+::selection { background: var(--accent); color: var(--card); }
+
+/* ---------- Кнопки ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px 22px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 1.2;
+  transition: transform 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+  text-align: center;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn:active { transform: translateY(0); }
+.btn-accent { background: var(--accent); color: #fff7ec; box-shadow: 0 10px 24px -10px rgba(191, 77, 36, 0.7); }
+.btn-accent:hover { background: var(--accent-dark); }
+.btn-wa { background: var(--wa); color: #f2fff7; }
+.btn-wa:hover { background: #0e6b3c; }
+.btn-tg { background: var(--tg); color: #f0faff; }
+.btn-tg:hover { background: #186289; }
+.btn-ghost { background: transparent; border: 1.5px solid currentColor; }
+.btn-call { background: transparent; border: 1.5px solid var(--hairline); color: var(--ink-soft); }
+.btn-call:hover { border-color: var(--ink-soft); }
+.btn-sm { padding: 9px 16px; font-size: 14px; }
+.book-btn.is-disabled { opacity: 0.55; }
+.link-btn { color: var(--ink-soft); text-decoration: underline; text-underline-offset: 3px; font-size: 14px; }
+.link-btn:hover { color: var(--accent); }
+
+/* ---------- Шапка ---------- */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  padding: 14px clamp(16px, 4vw, 48px);
+  background: rgba(247, 241, 230, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--hairline);
+}
+.wordmark {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-family: var(--font-display);
+  font-size: 21px;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+.wordmark-icon { width: 22px; height: 22px; fill: var(--accent); }
+.nav { display: flex; gap: 22px; margin: 0 auto; font-size: 14.5px; font-weight: 500; color: var(--ink-soft); }
+.nav a { position: relative; padding: 4px 0; }
+.nav a::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 100%; bottom: 0;
+  height: 2px;
+  background: var(--accent);
+  transition: right 0.22s ease;
+}
+.nav a:hover::after { right: 0; }
+.header-contacts { display: flex; align-items: center; gap: 10px; }
+.header-phone { font-weight: 700; font-size: 15px; white-space: nowrap; }
+.header-phone:hover { color: var(--accent); }
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px; height: 42px;
+  border-radius: 50%;
+  transition: transform 0.16s ease;
+}
+.icon-btn svg { width: 20px; height: 20px; fill: #fff; }
+.icon-btn:hover { transform: translateY(-2px) scale(1.05); }
+.icon-wa { background: var(--wa); }
+.icon-tg { background: var(--tg); }
+
+/* ---------- Hero ---------- */
+.hero { position: relative; min-height: 88vh; display: flex; align-items: center; }
+.hero-bg {
+  position: absolute; inset: 0;
+  overflow: hidden;
+  background: url('https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=2000&q=80') center/cover no-repeat;
+}
+.hero-bg::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(100deg, rgba(24, 17, 9, 0.88) 0%, rgba(24, 17, 9, 0.72) 42%, rgba(24, 17, 9, 0.28) 100%);
+}
+.hero-content {
+  position: relative;
+  z-index: 1;
+  max-width: 1160px;
+  width: 100%;
+  margin: 0 auto;
+  padding: clamp(70px, 10vh, 120px) clamp(16px, 4vw, 48px) 60px;
+  color: var(--cream-on-dark);
+}
+.hero-eyebrow {
+  font-size: 13.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 22px;
+  animation: rise 0.7s 0.05s both;
+}
+.hero-title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(34px, 5.6vw, 64px);
+  line-height: 1.14;
+  letter-spacing: 0.005em;
+  margin-bottom: 22px;
+  animation: rise 0.7s 0.15s both;
+}
+.hero-title em { font-style: italic; color: #ecc79d; }
+.hero-sub {
+  max-width: 560px;
+  font-size: clamp(15.5px, 1.6vw, 18px);
+  color: rgba(243, 234, 217, 0.85);
+  margin-bottom: 38px;
+  animation: rise 0.7s 0.25s both;
+}
+@keyframes rise {
+  from { opacity: 0; transform: translateY(22px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* поисковая карточка */
+.search-card {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+  background: var(--card);
+  color: var(--ink);
+  border-radius: var(--radius);
+  padding: 10px;
+  max-width: 680px;
+  box-shadow: var(--shadow);
+  animation: rise 0.7s 0.35s both;
+}
+.search-field {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  padding: 8px 16px;
+  border-radius: 10px;
+  text-align: left;
+  transition: background 0.15s ease;
+}
+button.search-field:hover { background: var(--paper-2); }
+.search-label { font-size: 11.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint); font-weight: 600; }
+.search-value { font-weight: 700; font-size: 16px; }
+.search-value.is-placeholder { color: var(--ink-faint); font-weight: 500; }
+.search-guests { flex: 0 0 auto; }
+.stepper { display: inline-flex; align-items: center; gap: 4px; }
+.stepper button {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  border: 1.5px solid var(--hairline);
+  font-size: 17px;
+  line-height: 1;
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+.stepper button:hover { border-color: var(--accent); color: var(--accent); }
+.stepper b { min-width: 26px; text-align: center; font-size: 16px; }
+.search-btn { flex: 0 0 auto; align-self: center; }
+
+/* поповер календаря */
+.popover {
+  display: none;
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  z-index: 40;
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 18px;
+  min-width: min(600px, 92vw);
+}
+.popover.is-open { display: block; animation: rise 0.25s both; }
+.popover-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; }
+
+.hero-stats { display: flex; gap: clamp(26px, 5vw, 60px); margin-top: 46px; animation: rise 0.7s 0.45s both; }
+.stat b { display: block; font-family: var(--font-display); font-size: clamp(21px, 2.6vw, 28px); color: #fff; }
+.stat span { font-size: 13.5px; color: rgba(243, 234, 217, 0.68); }
+
+/* ---------- Секции ---------- */
+.section { padding: clamp(64px, 9vw, 110px) clamp(16px, 4vw, 48px); max-width: 1240px; margin: 0 auto; }
+section[id] { scroll-margin-top: 76px; }
+.section-head { max-width: 760px; margin-bottom: clamp(34px, 5vw, 54px); }
+.section-eyebrow {
+  font-size: 13px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+.section-title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(27px, 3.6vw, 42px);
+  line-height: 1.2;
+  margin-bottom: 16px;
+}
+.section-sub { color: var(--ink-soft); font-size: 16.5px; max-width: 640px; }
+
+.reveal { opacity: 0; transform: translateY(26px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.reveal.is-revealed { opacity: 1; transform: none; }
+
+/* ---------- Каталог ---------- */
+.catalog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
+  gap: 26px;
+}
+.catalog-banner {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  flex-wrap: wrap;
+  background: var(--card);
+  border: 1px solid var(--hairline);
+  border-left: 4px solid var(--gold);
+  border-radius: var(--radius);
+  padding: 18px 22px;
+}
+.catalog-banner p { font-size: 15.5px; font-weight: 500; }
+.apt-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  overflow: hidden;
+  cursor: pointer;
+  border: 1px solid var(--hairline);
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+}
+.apt-card:hover { transform: translateY(-5px); box-shadow: var(--shadow); }
+.apt-card:focus-visible { outline: 2.5px solid var(--accent); outline-offset: 2px; }
+.apt-card.is-unavailable { opacity: 0.62; }
+.apt-card-photo { position: relative; aspect-ratio: 4 / 3; overflow: hidden; }
+.apt-card-photo img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
+.apt-card:hover .apt-card-photo img { transform: scale(1.045); }
+.apt-card-badges { position: absolute; top: 12px; left: 12px; display: flex; gap: 7px; flex-wrap: wrap; }
+.badge {
+  background: rgba(24, 17, 9, 0.72);
+  color: var(--cream-on-dark);
+  backdrop-filter: blur(4px);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 11px;
+  border-radius: 999px;
+  letter-spacing: 0.02em;
+}
+.apt-card-avail { position: absolute; bottom: 12px; left: 12px; }
+.avail {
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 999px;
+  display: inline-block;
+}
+.avail-yes { background: #e4f3e7; color: var(--green); }
+.avail-no { background: #f6e3e3; color: var(--red); }
+.apt-card-body { padding: 18px 20px 20px; }
+.apt-card-title { font-family: var(--font-display); font-weight: 400; font-size: 21px; margin-bottom: 5px; }
+.apt-card-meta { font-size: 14px; color: var(--accent); font-weight: 600; }
+.apt-card-specs { font-size: 14px; color: var(--ink-soft); margin-top: 3px; }
+.apt-card-foot { display: flex; align-items: baseline; justify-content: space-between; margin-top: 15px; gap: 10px; }
+.price-num { font-weight: 700; font-size: 18px; }
+.price-per { font-size: 13.5px; color: var(--ink-faint); }
+.apt-card-link { font-size: 14px; font-weight: 600; color: var(--accent); white-space: nowrap; }
+
+/* ---------- Почему напрямую ---------- */
+.section-why { max-width: none; background: var(--paper-2); }
+.section-why .section-head, .why-grid { max-width: 1240px; margin-left: auto; margin-right: auto; }
+.why-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: clamp(22px, 3vw, 40px);
+}
+.why-num {
+  font-family: var(--font-display);
+  font-size: 40px;
+  color: var(--accent);
+  opacity: 0.85;
+  display: block;
+  margin-bottom: 12px;
+}
+.why-item h3 { font-size: 17.5px; font-weight: 700; margin-bottom: 8px; line-height: 1.35; }
+.why-item p { font-size: 14.5px; color: var(--ink-soft); }
+.why-item:nth-child(2) { transition-delay: 0.08s; }
+.why-item:nth-child(3) { transition-delay: 0.16s; }
+.why-item:nth-child(4) { transition-delay: 0.24s; }
+
+/* ---------- О хозяине ---------- */
+.section-host { max-width: none; background: var(--dark); color: var(--cream-on-dark); position: relative; }
+.section-host::after {
+  content: '';
+  position: absolute; inset: 0;
+  pointer-events: none;
+  opacity: 0.5;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.09'/%3E%3C/svg%3E");
+}
+.host-card {
+  position: relative;
+  z-index: 1;
+  max-width: 1000px;
+  margin: 0 auto;
+  display: flex;
+  gap: clamp(28px, 5vw, 64px);
+  align-items: center;
+}
+.host-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent);
+  color: #fff4e6;
+  font-family: var(--font-display);
+  border-radius: 50%;
+}
+.host-avatar-big {
+  width: clamp(150px, 18vw, 210px);
+  height: clamp(150px, 18vw, 210px);
+  font-size: clamp(60px, 8vw, 90px);
+  box-shadow: 0 0 0 10px rgba(243, 234, 217, 0.08);
+  flex-shrink: 0;
+}
+/* реальное фото хозяина вместо заглушки-инициала (см. README) */
+.host-photo-img {
+  width: clamp(150px, 18vw, 210px);
+  height: clamp(150px, 18vw, 210px);
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 0 0 10px rgba(243, 234, 217, 0.08);
+  flex-shrink: 0;
+}
+.host-text .section-title { color: #fff; }
+.host-text p { color: rgba(243, 234, 217, 0.82); margin-bottom: 14px; }
+.host-legal { font-size: 14px; color: var(--gold) !important; }
+.host-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 22px; }
+.host-actions .btn-ghost { color: var(--cream-on-dark); }
+
+/* ---------- Отзывы ---------- */
+.ratings-row { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 34px; }
+.rating-pill {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  background: var(--card);
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  padding: 12px 20px;
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+.rating-pill:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+.rating-source { font-size: 12.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-faint); font-weight: 600; }
+.rating-num { font-family: var(--font-display); font-size: 22px; color: var(--accent); }
+.rating-num small { font-size: 13px; color: var(--ink-faint); }
+.rating-count { font-size: 13px; color: var(--ink-soft); }
+
+.reviews-track {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: min(400px, 82vw);
+  gap: 20px;
+  overflow-x: auto;
+  padding-bottom: 16px;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent-soft) transparent;
+}
+.review {
+  scroll-snap-align: start;
+  background: var(--card);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+}
+.review-stars { color: var(--gold); font-size: 15px; letter-spacing: 2px; margin-bottom: 12px; }
+.review-text { font-size: 15px; flex: 1; }
+.review-text::before { content: '«'; }
+.review-text::after { content: '»'; }
+.review-foot { margin-top: 16px; font-size: 13.5px; display: flex; flex-direction: column; gap: 1px; }
+.review-foot span { color: var(--ink-faint); }
+.review-reply {
+  margin-top: 14px;
+  padding: 11px 14px;
+  background: var(--paper);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 8px 8px 0;
+  font-size: 13.5px;
+  color: var(--ink-soft);
+}
+
+/* ---------- Командировочным ---------- */
+.section-business { max-width: none; background: var(--dark-2); color: var(--cream-on-dark); position: relative; }
+.section-business::after {
+  content: '';
+  position: absolute; inset: 0;
+  pointer-events: none;
+  opacity: 0.5;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.09'/%3E%3C/svg%3E");
+}
+.business-inner { position: relative; z-index: 1; max-width: 760px; margin: 0 auto; }
+.business-inner .section-title { color: #fff; }
+.business-inner > div > p { color: rgba(243, 234, 217, 0.82); }
+.docs-list { list-style: none; margin: 22px 0; display: flex; flex-direction: column; gap: 12px; }
+.docs-list li { padding-left: 34px; position: relative; color: rgba(243, 234, 217, 0.9); }
+.docs-list li::before {
+  content: '✓';
+  position: absolute; left: 0; top: 0;
+  width: 23px; height: 23px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 13px;
+  display: flex; align-items: center; justify-content: center;
+}
+.docs-list b { color: #fff; }
+.business-note { font-size: 14.5px; color: var(--gold) !important; margin-bottom: 24px; }
+
+/* ---------- FAQ ---------- */
+.section-faq .section-head { margin-bottom: 26px; }
+.faq-list { max-width: 760px; }
+.faq-item { border-bottom: 1px solid var(--hairline); }
+.faq-item summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 19px 40px 19px 0;
+  font-weight: 600;
+  font-size: 16.5px;
+  position: relative;
+  transition: color 0.15s ease;
+}
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item summary:hover { color: var(--accent); }
+.faq-item summary::after {
+  content: '+';
+  position: absolute;
+  right: 4px; top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--font-display);
+  font-size: 24px;
+  color: var(--accent);
+  transition: transform 0.2s ease;
+}
+.faq-item[open] summary::after { transform: translateY(-50%) rotate(45deg); }
+.faq-item p { padding: 0 40px 20px 0; color: var(--ink-soft); font-size: 15px; }
+
+/* ---------- Финальный CTA ---------- */
+.section-cta { padding-top: 0; }
+.cta-card {
+  background: var(--accent);
+  color: #fff4e6;
+  border-radius: 22px;
+  padding: clamp(38px, 6vw, 70px);
+  text-align: center;
+  box-shadow: 0 26px 60px -24px rgba(191, 77, 36, 0.75);
+}
+.cta-card .section-title { color: #fff; }
+.cta-card > p { max-width: 520px; margin: 0 auto 28px; color: rgba(255, 244, 230, 0.9); }
+.cta-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.cta-actions .btn-ghost { color: #fff4e6; }
+
+/* ---------- Футер ---------- */
+.footer { background: var(--dark); color: rgba(243, 234, 217, 0.75); padding: 54px clamp(16px, 4vw, 48px) 26px; }
+.footer-inner {
+  max-width: 1240px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 1.2fr;
+  gap: 36px;
+}
+.footer-col { display: flex; flex-direction: column; gap: 9px; font-size: 14.5px; }
+.footer-col b { color: #fff; font-size: 15px; margin-bottom: 4px; }
+.footer-col a:hover { color: var(--gold); }
+.wordmark-footer { color: #fff; margin-bottom: 6px; }
+.footer-legal span { font-size: 13.5px; }
+.footer-bottom {
+  max-width: 1240px;
+  margin: 40px auto 0;
+  padding-top: 20px;
+  border-top: 1px solid rgba(243, 234, 217, 0.14);
+  font-size: 13px;
+  color: rgba(243, 234, 217, 0.5);
+}
+
+/* ---------- Календарь ---------- */
+.cal-nav { display: flex; justify-content: space-between; margin-bottom: 6px; }
+.cal-btn {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  border: 1.5px solid var(--hairline);
+  font-size: 18px;
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+.cal-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.cal-btn:disabled { opacity: 0.3; cursor: default; }
+.cal-months { display: flex; gap: 26px; }
+.cal-month { flex: 1; }
+.cal-title { text-align: center; font-weight: 700; font-size: 14.5px; margin-bottom: 8px; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+.cal-wd { text-align: center; font-size: 11.5px; color: var(--ink-faint); text-transform: uppercase; padding: 4px 0; font-weight: 600; }
+.cal-day {
+  display: block;
+  width: 100%;
+  text-align: center;
+  padding: 10px 0;
+  font-size: 13.5px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.12s ease;
+  position: relative;
+  font-weight: 500;
+}
+.cal-day:hover:not(:disabled) { background: var(--accent-soft); }
+.cal-day:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.cal-day:disabled { cursor: default; }
+.cal-day.is-past { color: var(--ink-faint); opacity: 0.4; }
+.cal-day.is-busy { color: var(--ink-faint); text-decoration: line-through; background: var(--paper-2); }
+.cal-day.is-blocked { color: var(--ink-faint); opacity: 0.55; }
+.cal-day.is-mid { background: var(--accent-soft); border-radius: 0; }
+.cal-day.is-start, .cal-day.is-end { background: var(--accent); color: #fff; font-weight: 700; }
+.cal-day.is-start { border-radius: 8px 0 0 8px; }
+.cal-day.is-end { border-radius: 0 8px 8px 0; }
+.cal-day.is-start.is-end { border-radius: 8px; }
+.cal-legend { display: flex; gap: 18px; font-size: 13px; color: var(--ink-soft); margin: 10px 0 4px; }
+.cal-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.dot { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
+.dot-free { background: var(--card); border: 1.5px solid var(--hairline); }
+.dot-busy { background: var(--paper-2); position: relative; }
+.dot-busy::after { content: ''; position: absolute; left: 1px; right: 1px; top: 50%; height: 1.5px; background: var(--ink-faint); }
+
+/* ---------- Карточка квартиры ---------- */
+.apt-page { max-width: 1240px; margin: 0 auto; padding: 28px clamp(16px, 4vw, 48px) 90px; }
+.back-link { font-size: 15px; font-weight: 600; color: var(--ink-soft); margin-bottom: 22px; transition: color 0.15s ease; }
+.back-link:hover { color: var(--accent); }
+.apt-head { margin-bottom: 22px; }
+.apt-title { font-family: var(--font-display); font-weight: 400; font-size: clamp(28px, 4vw, 44px); line-height: 1.15; margin-bottom: 8px; }
+.apt-sub { color: var(--ink-soft); font-size: 15.5px; }
+.apt-sub a { color: var(--accent); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+
+.gallery { margin-bottom: 36px; }
+.gallery-main {
+  position: relative;
+  border-radius: var(--radius);
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  background: var(--paper-2);
+}
+.gallery-main img { width: 100%; height: 100%; object-fit: cover; }
+.gallery-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 252, 245, 0.92);
+  color: var(--ink);
+  font-size: 24px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 16px rgba(36, 28, 18, 0.25);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+.gallery-arrow:hover { background: #fff; transform: translateY(-50%) scale(1.07); }
+.gallery-prev { left: 16px; }
+.gallery-next { right: 16px; }
+.gallery-count {
+  position: absolute;
+  bottom: 14px; right: 16px;
+  background: rgba(24, 17, 9, 0.72);
+  color: var(--cream-on-dark);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 999px;
+}
+.gallery-thumbs { display: flex; gap: 10px; margin-top: 10px; overflow-x: auto; padding-bottom: 4px; }
+.gallery-thumbs img {
+  width: 108px; height: 76px;
+  object-fit: cover;
+  border-radius: 9px;
+  cursor: pointer;
+  opacity: 0.65;
+  transition: opacity 0.15s ease, outline 0.15s ease;
+  outline: 2.5px solid transparent;
+  flex-shrink: 0;
+}
+.gallery-thumbs img:hover { opacity: 1; }
+.gallery-thumbs img.is-current { opacity: 1; outline-color: var(--accent); }
+
+.apt-columns { display: grid; grid-template-columns: 1fr 400px; gap: clamp(28px, 4vw, 56px); align-items: start; }
+.apt-specs { display: flex; gap: 14px; margin-bottom: 20px; flex-wrap: wrap; }
+.spec {
+  background: var(--card);
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  padding: 12px 20px;
+  display: flex;
+  flex-direction: column;
+}
+.spec-num { font-family: var(--font-display); font-size: 19px; }
+.spec span:last-child { font-size: 13px; color: var(--ink-soft); }
+.apt-beds { font-weight: 600; margin-bottom: 14px; font-size: 15px; }
+.apt-desc { color: var(--ink-soft); font-size: 16px; }
+.h-block { font-family: var(--font-display); font-weight: 400; font-size: 23px; margin: 34px 0 14px; }
+.apt-important {
+  background: #f7ead9;
+  border-left: 3px solid var(--gold);
+  border-radius: 0 10px 10px 0;
+  padding: 14px 18px;
+  color: var(--ink-soft);
+  font-size: 15px;
+}
+.amenities {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 9px 20px;
+}
+.amenities li { padding-left: 26px; position: relative; font-size: 15px; }
+.amenities li::before { content: '✓'; position: absolute; left: 0; color: var(--green); font-weight: 700; }
+.rules { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.rules li { padding-left: 24px; position: relative; font-size: 15px; color: var(--ink-soft); }
+.rules li::before { content: '·'; position: absolute; left: 6px; color: var(--accent); font-weight: 900; font-size: 22px; line-height: 1; }
+
+/* бронирование */
+.apt-booking {
+  position: sticky;
+  top: 86px;
+  background: var(--card);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  padding: 22px;
+  box-shadow: 0 14px 40px -20px rgba(36, 28, 18, 0.3);
+}
+.host-mini {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--hairline);
+}
+.host-mini .host-avatar { width: 46px; height: 46px; font-size: 21px; flex-shrink: 0; }
+.host-mini b { display: block; font-size: 14.5px; }
+.host-mini span { font-size: 13px; color: var(--ink-soft); }
+.booking-title { font-family: var(--font-display); font-weight: 400; font-size: 21px; margin-bottom: 10px; }
+.booking-guests { display: flex; align-items: center; justify-content: space-between; margin: 14px 0; font-weight: 600; font-size: 15px; }
+.calc { border-top: 1px solid var(--hairline); padding-top: 14px; }
+.calc-row { display: flex; justify-content: space-between; gap: 12px; font-size: 14.5px; margin-bottom: 7px; color: var(--ink-soft); }
+.calc-discount { color: var(--green); font-weight: 600; }
+.calc-total { font-size: 17px; font-weight: 700; color: var(--ink); border-top: 1px dashed var(--hairline); padding-top: 10px; margin-top: 10px; }
+.calc-note { font-size: 12.5px; color: var(--ink-faint); margin-top: 8px; }
+.calc-hint { font-size: 14px; color: var(--ink-soft); border-top: 1px solid var(--hairline); padding-top: 14px; }
+.booking-actions { display: flex; flex-direction: column; gap: 9px; margin-top: 16px; }
+
+/* другие квартиры */
+.apt-others { margin-top: 56px; }
+.others-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr)); gap: 18px; }
+.other-card {
+  display: flex;
+  gap: 14px;
+  background: var(--card);
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  padding: 12px;
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+.other-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+.other-card img { width: 96px; height: 78px; object-fit: cover; border-radius: 9px; flex-shrink: 0; }
+.other-card b { display: block; font-size: 15px; margin-bottom: 2px; }
+.other-card span { font-size: 13.5px; color: var(--ink-soft); display: block; }
+.other-card .avail { margin-top: 6px; font-size: 11.5px; padding: 3px 9px; }
+
+/* sticky-панель на мобильном */
+.apt-sticky {
+  display: none;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  z-index: 45;
+  background: var(--card);
+  border-top: 1px solid var(--hairline);
+  box-shadow: 0 -8px 30px rgba(36, 28, 18, 0.15);
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+#apt-sticky-price { font-size: 14.5px; color: var(--ink-soft); }
+#apt-sticky-price strong { font-size: 17px; color: var(--ink); }
+
+/* ---------- Тост ---------- */
+.toast {
+  position: fixed;
+  bottom: 26px;
+  left: 50%;
+  transform: translate(-50%, 20px);
+  background: var(--ink);
+  color: var(--paper);
+  padding: 13px 22px;
+  border-radius: 12px;
+  font-size: 14.5px;
+  font-weight: 500;
+  box-shadow: var(--shadow);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  z-index: 100;
+  max-width: min(480px, 90vw);
+  text-align: center;
+}
+.toast.is-visible { opacity: 1; transform: translate(-50%, 0); }
+
+/* ---------- Адаптив ---------- */
+@media (max-width: 1000px) {
+  .header-phone { display: none; }
+  .nav { gap: 14px; font-size: 13.5px; }
+  .apt-columns { grid-template-columns: 1fr; }
+  .apt-booking { position: static; }
+  .footer-inner { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 720px) {
+  .header { gap: 12px; }
+  .nav { display: none; }
+  .hero { min-height: auto; }
+  .hero-content { padding-top: 56px; padding-bottom: 46px; }
+  .search-card { flex-direction: column; align-items: stretch; }
+  .search-guests { border-top: 1px solid var(--hairline); border-radius: 0; }
+  .search-guests .stepper { justify-content: flex-start; }
+  .search-btn { width: 100%; }
+  .popover { left: 0; right: 0; min-width: 0; max-height: 68vh; overflow-y: auto; }
+  .cal-months { flex-direction: column; gap: 18px; }
+  .hero-stats { flex-wrap: wrap; gap: 20px 34px; margin-top: 36px; }
+  .host-card { flex-direction: column; text-align: center; }
+  .host-actions { justify-content: center; }
+  .gallery-main { aspect-ratio: 4 / 3; }
+  .gallery-arrow { width: 44px; height: 44px; }
+  .footer-inner { grid-template-columns: 1fr; gap: 26px; }
+  body.is-apt-page .apt-sticky { display: flex; }
+  body.is-apt-page .footer { padding-bottom: 100px; }
+  .apt-page { padding-bottom: 130px; }
+}
