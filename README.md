@@ -54,16 +54,22 @@ site/
 - Отдельный блок для командировочных (чек, договор, акт) — незанятая ниша, у конкурентов этого нет.
 - Мобильная версия со sticky-панелью бронирования, Schema.org-разметка, OG-теги.
 
-## Публикация на GitHub Pages (бесплатно)
+## Публикация
+
+Сайт опубликован на GitHub Pages (бесплатно): **https://kusov777.github.io/maksim-rent/**
+Репозиторий: https://github.com/Kusov777/maksim-rent
+
+Обновление после правок:
 
 ```powershell
-# один раз: создать репозиторий и включить Pages
-gh repo create maksim-rent --public --source . --push
-gh api repos/{owner}/maksim-rent/pages -X POST -f "source[branch]=master" -f "source[path]=/"
+git add -A
+git commit -m "Обновление данных"
+git push
 ```
 
-Сайт будет доступен по адресу `https://<owner>.github.io/maksim-rent/site/`.
-Свой домен (например, `umaksima.ru`) подключается в настройках Pages.
+Через 1–2 минуты Pages пересоберётся автоматически.
+Свой домен (например, `umaksima.ru`) подключается в настройках Pages репозитория;
+после привязки добавить canonical/og:url в `site/index.html` (см. комментарий в head).
 
 ## Что отложено на потом (когда пойдут заявки)
 
