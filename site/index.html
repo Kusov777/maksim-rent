@@ -4,13 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>У Максима — посуточные квартиры в Санкт-Петербурге напрямую от хозяина</title>
-  <meta name="description" content="5 квартир посуточно в Петербурге напрямую от хозяина: без комиссий и сервисных сборов, календарь занятости онлайн, бронирование в WhatsApp и Telegram за 30 секунд. Отчётные документы для командировочных.">
+  <meta name="description" content="Студии и квартиры посуточно в Петербурге от 2 550 ₽ напрямую от хозяина: без комиссий и сервисных сборов, календарь занятости онлайн, бронирование в WhatsApp и Telegram за 30 секунд. Отчётные документы для командировочных.">
   <meta property="og:title" content="У Максима — посуточные квартиры в Санкт-Петербурге">
   <meta property="og:description" content="Напрямую от хозяина: без комиссий, живой календарь занятости, заявка в мессенджер за 30 секунд.">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="ru_RU">
   <meta property="og:site_name" content="У Максима">
-  <meta property="og:image" content="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=80">
+  <meta property="og:image" content="https://kusov777.github.io/maksim-rent/site/photos/m8-15-180/01.jpg">
   <meta name="twitter:card" content="summary_large_image">
   <!-- После привязки домена добавить:
        <link rel="canonical" href="https://ваш-домен/">
@@ -18,7 +18,7 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='80' font-size='80'>🗝️</text></svg>">
   <link rel="preload" href="fonts/prata-v22-cyrillic_latin-regular.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/golos-text-v7-cyrillic_latin-regular.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" as="image" href="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=2000&q=80">
+  <link rel="preload" as="image" href="photos/fontanka-27/02.jpg">
   <link rel="stylesheet" href="styles.css">
   <!-- Яндекс.Метрика: когда Максим заведёт счётчик, вставить сюда стандартный сниппет
        и прописать его номер в data.js → SITE.metrikaId. Цели уже размечены в коде:
@@ -67,12 +67,13 @@
 
     <!-- ============ HERO ============ -->
     <section class="hero">
-      <div class="hero-bg" role="img" aria-label="Гостиная одной из квартир"></div>
+      <div class="hero-bg" role="img" aria-label="Студия на Фонтанке — кирпичные своды"></div>
       <div class="hero-content">
         <p class="hero-eyebrow">Санкт-Петербург · напрямую от хозяина</p>
         <h1 class="hero-title">Квартиры посуточно —<br>без посредников <em>и&nbsp;без&nbsp;комиссий</em></h1>
-        <p class="hero-sub">Пять моих квартир рядом с метро — от Невского до Московского проспекта.
-          Цена на сайте — окончательная: никаких сервисных сборов, а на любой вопрос отвечаю я сам, а не колл-центр.</p>
+        <p class="hero-sub">Десять студий и квартир: Красноармейские улицы у Технологического, Фонтанка,
+          ЖК «Зенит» и двушка с видом на залив. Цена на сайте — окончательная: никаких сервисных сборов,
+          а на любой вопрос отвечаю я сам, а не колл-центр.</p>
 
         <div class="search-card">
           <button class="search-field" id="hero-dates-toggle" type="button" aria-haspopup="dialog" aria-expanded="false">
@@ -99,7 +100,7 @@
 
         <div class="hero-stats">
           <div class="stat"><b id="stat-years"></b><span>сдаю квартиры сам</span></div>
-          <div class="stat"><b data-site="guestsHosted"></b><span>гостей принял с <span data-site="yearsSince"></span> года</span></div>
+          <div class="stat"><b id="stat-reviews"></b><span>отзывов на Авито</span></div>
           <div class="stat"><b id="stat-rating"></b><span>средний рейтинг на площадках</span></div>
         </div>
       </div>
@@ -109,9 +110,10 @@
     <section class="section" id="catalog">
       <div class="section-head reveal">
         <p class="section-eyebrow">Каталог</p>
-        <h2 class="section-title">Пять квартир — все мои,<br>других не бывает</h2>
-        <p class="section-sub">Каждую квартиру я обставлял сам и знаю в ней каждый угол.
-          На фото — именно та квартира, в которую вы заедете. Выберите даты выше — покажу, что свободно, и посчитаю итог.</p>
+        <h2 class="section-title">Десять квартир и студий —<br>все мои</h2>
+        <p class="section-sub">Студии в историческом центре от 2 550 ₽ и квартиры в новых домах — все под моим
+          личным управлением. На фото — именно та квартира, в которую вы заедете.
+          Выберите даты выше — покажу, что свободно, и посчитаю итог.</p>
       </div>
       <div class="catalog-grid" id="catalog-grid"></div>
     </section>
@@ -156,8 +158,10 @@
         <div class="host-text">
           <p class="section-eyebrow">Кто сдаёт</p>
           <h2 class="section-title">Я Максим. Это мои квартиры,<br>и сдаю я их сам</h2>
-          <p>С 2020 года — без управляющей компании и посредников. Сам встречаю гостей, сам слежу за чистотой,
-            сам отвечаю в мессенджерах <span data-site="workHours"></span>. Если что-то не так — вы пишете не в поддержку, а человеку, который может это исправить сегодня.</p>
+          <p>С 2019 года сдаю квартиры в Петербурге — на Авито мы работаем как «Residents М5/М8»:
+            145 отзывов, рейтинг 4,5 и статус надёжного продавца с подтверждёнными данными.
+            Встречу лично или заселю бесконтактно — хоть ночью. Если что-то не так —
+            вы пишете не в поддержку, а человеку, который может это исправить сегодня.</p>
           <p class="host-legal"><span data-site="legalStatus"></span> · все брони — по договору найма, с чеком.</p>
           <div class="host-actions">
             <a class="btn btn-wa" data-href-wa data-track="host_whatsapp" href="#" target="_blank" rel="noopener">Задать вопрос в WhatsApp</a>
@@ -186,11 +190,11 @@
           <h2 class="section-title">Полный пакет отчётных документов — без напоминаний</h2>
           <p>Живёте как дома, отчитываетесь как в отеле. Сразу при заселении выдаю всё, что примет ваша бухгалтерия:</p>
           <ul class="docs-list">
-            <li><b>Чек</b> — официальный, из приложения «Мой налог»</li>
             <li><b>Договор краткосрочного найма</b> — с датами, суммой и реквизитами</li>
+            <li><b>Документы об оплате</b> — чек или подтверждение перевода</li>
             <li><b>Акт</b> — по запросу, если требует ваша форма отчётности</li>
           </ul>
-          <p class="business-note">Оплата переводом или наличными — чек в любом случае. Нужен счёт на организацию — обсудим, напишите.</p>
+          <p class="business-note">Оплата переводом или наличными — документы для отчёта в любом случае. Нужен счёт на организацию — обсудим, напишите.</p>
           <a class="btn btn-accent" data-href-wa data-wa-text="Здравствуйте, Максим! Я в командировку — расскажите, какие отчётные документы вы выдаёте и как оформляется бронь." data-track="business_whatsapp" href="#" target="_blank" rel="noopener">Уточнить по документам</a>
         </div>
       </div>
@@ -249,7 +253,7 @@
       <div class="footer-col footer-legal">
         <b>Реквизиты</b>
         <span><span data-site="legalStatus"></span></span>
-        <span>ИНН <span data-site="inn"></span></span>
+        <span data-inn-line>ИНН <span data-site="inn"></span></span>
         <span>Заезд с <span data-site="checkIn"></span>, выезд до <span data-site="checkOut"></span></span>
       </div>
     </div>

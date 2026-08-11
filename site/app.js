@@ -77,6 +77,9 @@ function calcPrice(apt, checkin, checkout, guests) {
   const discountAmt = Math.round(base * discountPct / 100);
   return { nights, base, extraGuests, extraFee, discountPct, discountAmt, total: base + extraFee - discountAmt };
 }
+function aptDeposit(apt) {
+  return apt.deposit != null ? apt.deposit : SITE.deposit;
+}
 function priceRangeLabel(apt) {
   const lo = Math.min(apt.priceWeekday, apt.priceWeekend);
   const hi = Math.max(apt.priceWeekday, apt.priceWeekend);
@@ -471,7 +474,7 @@ function renderAptBooking(apt) {
         ${p.extraFee ? `<div class="calc-row"><span>Доплата за ${p.extraGuests} доп. ${plural(p.extraGuests, 'гостя', 'гостей', 'гостей')} (${fmtMoney(p.extraGuests * apt.extraGuestFee)}/ночь)</span><span>+${fmtMoney(p.extraFee)}</span></div>` : ''}
         ${p.discountPct ? `<div class="calc-row calc-discount"><span>Скидка за ${p.nights} ${nightsWord(p.nights)}</span><span>−${fmtMoney(p.discountAmt)}</span></div>` : ''}
         <div class="calc-row calc-total"><span>Итого</span><span>${fmtMoney(p.total)}</span></div>
-        <p class="calc-note">Это окончательная цена — без комиссий и сборов при заселении. Залог ${fmtMoney(SITE.deposit)} возвращается при выезде.</p>
+        <p class="calc-note">Это окончательная цена — без комиссий и сборов при заселении. ${aptDeposit(apt) > 0 ? `Залог ${fmtMoney(aptDeposit(apt))} возвращается при выезде.` : 'Без залога.'}</p>
       </div>`;
     if (stickyPrice) stickyPrice.innerHTML = `<strong>${fmtMoney(p.total)}</strong> за ${p.nights} ${nightsWord(p.nights)}`;
   } else {
@@ -530,13 +533,15 @@ function renderAptView(apt) {
 
           <h2 class="h-block">Условия</h2>
           <ul class="rules">
-            <li>Заезд с ${SITE.checkIn}, выезд до ${SITE.checkOut}. ${SITE.earlyCheckIn}</li>
-            <li>Минимальный срок — ${SITE.minNights} ${nightsWord(SITE.minNights)}. Скидки: ${SITE.discounts.map(d => `от ${d.nights} ночей — ${d.pct}%`).join(', ')}.</li>
-            <li>Залог ${fmtMoney(SITE.deposit)}, возвращается в день выезда.</li>
-            <li>Бесплатная отмена за ${SITE.cancellationDays} ${plural(SITE.cancellationDays, 'день', 'дня', 'дней')} до заезда; позже — перенос дат один раз бесплатно.</li>
-            <li>Для договора нужен паспорт. Точный адрес и код подъезда — после подтверждения брони.</li>
-            <li>Курение и шумные вечеринки запрещены.</li>
-            <li>Командировочным выдаю отчётные документы: чек, договор найма, акт.</li>
+            <li>Заезд с ${SITE.checkIn}, выезд до ${SITE.checkOut}. Бесконтактное заселение — круглосуточно: код от сейф-бокса пришлю после подтверждения.</li>
+            ${SITE.minNights > 1 ? `<li>Минимальный срок — ${SITE.minNights} ${nightsWord(SITE.minNights)}.</li>` : ''}
+            ${SITE.discounts.length ? `<li>Скидки: ${SITE.discounts.map(d => `от ${d.nights} ночей — ${d.pct}%`).join(', ')}.</li>` : '<li>На длительное проживание (от недели и помесячно) — своя цена, спросите.</li>'}
+            <li>${aptDeposit(apt) > 0 ? `Залог ${fmtMoney(aptDeposit(apt))}, возвращается при выезде при соблюдении правил.` : 'Без залога.'}</li>
+            <li>Для договора нужен паспорт. Заселяю гостей старше 18 лет.</li>
+            <li>Курение запрещено, тишина с 22:00 до 8:00.</li>
+            <li>С питомцем — по согласованию, доплата от 2 000 ₽.</li>
+            <li>Командировочным — отчётные документы для бухгалтерии.</li>
+            <li>Отмена или перенос дат — напишите как можно раньше, решим по-человечески.</li>
           </ul>
         </div>
 
@@ -761,6 +766,12 @@ function hydrateStatic() {
     const years = new Date().getFullYear() - SITE.yearsSince;
     yearsEl.textContent = `${years} ${plural(years, 'год', 'года', 'лет')}`;
   }
+  const reviewsEl = document.querySelector('#stat-reviews');
+  if (reviewsEl) {
+    reviewsEl.textContent = SITE.platformRatings.reduce((s, r) => s + (r.reviews || 0), 0);
+  }
+  const innLine = document.querySelector('[data-inn-line]');
+  if (innLine && !SITE.inn) innLine.hidden = true;
   const ratingEl = document.querySelector('#stat-rating');
   if (ratingEl && SITE.platformRatings.length) {
     const avg = SITE.platformRatings.reduce((sum, r) =>
