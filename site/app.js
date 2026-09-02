@@ -384,10 +384,17 @@ function renderCatalog() {
         ${apt.photos.length <= 8
           ? `<div class="card-dots">${apt.photos.map((_, i) => `<i data-carddot class="${i === i0 ? 'is-current' : ''}"></i>`).join('')}</div>`
           : `<div class="card-count">${i0 + 1} / ${apt.photos.length}</div>`}` : '';
+    // соседние кадры без src — подгружаем их только при касании или наведении
+    const neighbours = many
+      ? '<img class="card-slide" data-slide="-1" alt="" aria-hidden="true"><img class="card-slide" data-slide="1" alt="" aria-hidden="true">'
+      : '';
     return `
     <article class="apt-card ${unavailable ? 'is-unavailable' : ''}" data-goto="${apt.id}" tabindex="0" role="link" aria-label="${apt.title} — подробнее">
       <div class="apt-card-photo">
-        <img src="${thumb(apt.photos[i0])}" alt="${apt.title} — фото ${i0 + 1}" loading="lazy" onerror="imgFallback(this)">
+        <div class="card-track">
+          <img class="card-slide" data-slide="0" src="${thumb(apt.photos[i0])}" alt="${apt.title} — фото ${i0 + 1}" loading="lazy" onerror="imgFallback(this)">
+          ${neighbours}
+        </div>
         ${nav}
         <div class="apt-card-badges">${apt.badges.map(b => `<span class="badge">${b}</span>`).join('')}</div>
         ${availHtml ? `<div class="apt-card-avail">${availHtml}</div>` : ''}
@@ -406,42 +413,99 @@ function renderCatalog() {
 
   grid.querySelectorAll('[data-goto]').forEach(card => {
     const apt = APARTMENTS.find(a => a.id === card.dataset.goto);
-    let swiped = false;
+    let swipedAt = 0;
     const go = () => {
-      if (swiped) { swiped = false; return; } // это был свайп по фото, а не клик
+      if (performance.now() - swipedAt < 400) return; // это был свайп по фото, а не клик
       location.hash = '#/apt/' + card.dataset.goto;
     };
     card.addEventListener('click', go);
     card.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
 
-    // листание фото, не заходя в квартиру
+    // листание фото, не заходя в квартиру: лента из трёх кадров едет за пальцем
     const photo = card.querySelector('.apt-card-photo');
-    const img = photo.querySelector('img');
     const n = apt.photos.length;
-    const showPhoto = idx => {
-      const i = ((idx % n) + n) % n;
+    if (n < 2) return;
+    const track = photo.querySelector('.card-track');
+    const slide = d => photo.querySelector(`[data-slide="${d}"]`);
+    const at = i => thumb(apt.photos[((i % n) + n) % n]);
+    const cur = () => state.cardIdx[apt.id] || 0;
+
+    const primeNeighbours = () => {
+      if (!slide(-1).getAttribute('src')) slide(-1).src = at(cur() - 1);
+      if (!slide(1).getAttribute('src')) slide(1).src = at(cur() + 1);
+    };
+    const commit = dir => {
+      const i = ((cur() + dir) % n + n) % n;
       state.cardIdx[apt.id] = i;
-      img.src = thumb(apt.photos[i]);
-      img.alt = `${apt.title} — фото ${i + 1}`;
+      track.style.transition = 'none';
+      track.style.transform = 'translateX(0)';
+      slide(0).src = at(i);
+      slide(0).alt = `${apt.title} — фото ${i + 1}`;
+      slide(-1).src = at(i - 1);
+      slide(1).src = at(i + 1);
       photo.querySelectorAll('[data-carddot]').forEach((d, k) => d.classList.toggle('is-current', k === i));
       const counter = photo.querySelector('.card-count');
       if (counter) counter.textContent = `${i + 1} / ${n}`;
-      new Image().src = thumb(apt.photos[(i + 1) % n]); // следующее подгружаем заранее
     };
+    let pending = null;                          // незавершённый переход: {dir, timer}
+    const finish = () => {                       // transitionend не придёт, если сдвига не было
+      if (!pending) return;
+      clearTimeout(pending.timer);
+      if (pending.dir) commit(pending.dir); else track.style.transition = '';
+      pending = null;
+    };
+    const glide = dir => {                       // dir: 1 вперёд, -1 назад, 0 вернуть на место
+      finish();                                  // предыдущий переход досчитываем сразу
+      primeNeighbours();
+      void track.offsetWidth;                    // чтобы новый переход анимировался, а не слился с предыдущим
+      track.style.transition = 'transform 0.3s cubic-bezier(0.22, 0.61, 0.36, 1)';
+      track.style.transform = `translateX(${-dir * 100}%)`;
+      pending = { dir, timer: setTimeout(finish, 310) };
+    };
+
     photo.querySelectorAll('[data-cardnav]').forEach(btn => {
       btn.addEventListener('click', e => {
-        e.stopPropagation(); // не открываем карточку квартиры
-        showPhoto((state.cardIdx[apt.id] || 0) + Number(btn.dataset.cardnav));
+        e.stopPropagation();                      // не открываем карточку квартиры
+        glide(Number(btn.dataset.cardnav));
       });
     });
-    let touchX = null;
-    photo.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; swiped = false; }, { passive: true });
-    photo.addEventListener('touchend', e => {
-      if (touchX === null) return;
-      const dx = e.changedTouches[0].clientX - touchX;
-      if (Math.abs(dx) > 40) { swiped = true; showPhoto((state.cardIdx[apt.id] || 0) + (dx < 0 ? 1 : -1)); }
-      touchX = null;
+    card.addEventListener('mouseenter', primeNeighbours);
+
+    let startX = null, startY = null, axis = null, dx = 0;
+    photo.addEventListener('touchstart', e => {
+      finish();                                  // палец лёг во время перехода — досчитываем его
+      primeNeighbours();
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+      axis = null;
+      dx = 0;
+      track.style.transition = 'none';
     }, { passive: true });
+    photo.addEventListener('touchmove', e => {
+      if (startX === null) return;
+      const mx = e.touches[0].clientX - startX;
+      const my = e.touches[0].clientY - startY;
+      if (axis === null) {
+        if (Math.abs(mx) < 8 && Math.abs(my) < 8) return;
+        axis = Math.abs(mx) > Math.abs(my) ? 'x' : 'y';
+      }
+      if (axis === 'y') return;                   // палец ведёт страницу, а не карусель
+      e.preventDefault();
+      dx = mx;
+      track.style.transform = `translateX(${dx}px)`;
+    }, { passive: false });
+    const endTouch = () => {
+      if (startX === null) return;
+      if (axis === 'x') {
+        if (Math.abs(dx) > 6) swipedAt = performance.now();  // это жест, а не клик по карточке
+        const far = Math.abs(dx) > (photo.clientWidth || 1) * 0.18;
+        glide(far ? (dx < 0 ? 1 : -1) : 0);
+      }
+      startX = startY = null;
+      dx = 0;
+    };
+    photo.addEventListener('touchend', endTouch, { passive: true });
+    photo.addEventListener('touchcancel', endTouch, { passive: true });
   });
 }
 
