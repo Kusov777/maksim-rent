@@ -226,6 +226,67 @@ function toast(msg) {
   toastTimer = setTimeout(() => el.classList.remove('is-visible'), 3200);
 }
 
+/* ---------- Полноэкранный просмотр фото ---------- */
+const lb = { el: null, photos: [], idx: 0, onIndex: null, lastFocus: null };
+
+function lbShow(idx) {
+  const n = lb.photos.length;
+  lb.idx = ((idx % n) + n) % n;
+  lb.el.querySelector('.lightbox-img').src = lb.photos[lb.idx];
+  lb.el.querySelector('.lightbox-count').textContent = `${lb.idx + 1} / ${n}`;
+  if (lb.onIndex) lb.onIndex(lb.idx);
+}
+function lbClose() {
+  lb.el.classList.remove('is-open');
+  document.body.classList.remove('is-lightbox');
+  if (lb.lastFocus && document.contains(lb.lastFocus)) lb.lastFocus.focus();
+}
+function openLightbox(photos, title, startIdx, onIndex) {
+  if (!lb.el) {
+    lb.el = document.createElement('div');
+    lb.el.className = 'lightbox';
+    lb.el.setAttribute('role', 'dialog');
+    lb.el.setAttribute('aria-modal', 'true');
+    lb.el.setAttribute('aria-label', 'Просмотр фото');
+    lb.el.innerHTML =
+      '<img class="lightbox-img" alt="">' +
+      '<button class="lightbox-close" type="button" aria-label="Закрыть просмотр">×</button>' +
+      '<button class="lightbox-arrow lightbox-prev" type="button" aria-label="Предыдущее фото">‹</button>' +
+      '<button class="lightbox-arrow lightbox-next" type="button" aria-label="Следующее фото">›</button>' +
+      '<div class="lightbox-count"></div>';
+    document.body.appendChild(lb.el);
+    const lbImg = lb.el.querySelector('.lightbox-img');
+    lbImg.addEventListener('error', () => imgFallback(lbImg));
+    lb.el.querySelector('.lightbox-close').addEventListener('click', lbClose);
+    lb.el.querySelector('.lightbox-prev').addEventListener('click', () => lbShow(lb.idx - 1));
+    lb.el.querySelector('.lightbox-next').addEventListener('click', () => lbShow(lb.idx + 1));
+    // клик мимо фото закрывает просмотр
+    lb.el.addEventListener('click', e => { if (e.target === lb.el || e.target === lbImg) lbClose(); });
+    document.addEventListener('keydown', e => {
+      if (!lb.el.classList.contains('is-open')) return;
+      if (e.key === 'Escape') lbClose();
+      else if (e.key === 'ArrowLeft') lbShow(lb.idx - 1);
+      else if (e.key === 'ArrowRight') lbShow(lb.idx + 1);
+    });
+    let tx = null;
+    lb.el.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, { passive: true });
+    lb.el.addEventListener('touchend', e => {
+      if (tx === null) return;
+      const dx = e.changedTouches[0].clientX - tx;
+      if (Math.abs(dx) > 40) lbShow(lb.idx + (dx < 0 ? 1 : -1));
+      tx = null;
+    }, { passive: true });
+  }
+  lb.photos = photos;
+  lb.onIndex = onIndex || null;
+  lb.lastFocus = document.activeElement;
+  lb.el.querySelector('.lightbox-img').alt = `${title} — фото`;
+  lb.el.classList.add('is-open');
+  document.body.classList.add('is-lightbox');
+  lbShow(startIdx || 0);
+  lb.el.querySelector('.lightbox-close').focus();
+}
+
 /* ---------- Заявка на бронь ---------- */
 function bookingMessage(apt, sel) {
   const price = calcPrice(apt, sel.checkin, sel.checkout, sel.guests);
@@ -508,6 +569,7 @@ function renderAptView(apt) {
           <img id="gallery-img" src="${apt.photos[gIdx]}" alt="${apt.title} — фото ${gIdx + 1}" onerror="imgFallback(this)">
           <button class="gallery-arrow gallery-prev" data-gal="-1" aria-label="Предыдущее фото">‹</button>
           <button class="gallery-arrow gallery-next" data-gal="1" aria-label="Следующее фото">›</button>
+          <button class="gallery-zoom" type="button" data-galopen aria-label="Открыть фото на весь экран">⤢</button>
           <div class="gallery-count">${gIdx + 1} / ${apt.photos.length}</div>
         </div>
         <div class="gallery-thumbs">
@@ -627,14 +689,22 @@ function renderAptView(apt) {
   view.querySelectorAll('[data-galto]').forEach(t =>
     t.addEventListener('click', () => galShow(Number(t.dataset.galto))));
   const mainImg = view.querySelector('#gallery-img');
-  let touchX = null;
-  mainImg.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; }, { passive: true });
+  let touchX = null, swiped = false;
+  mainImg.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; swiped = false; }, { passive: true });
   mainImg.addEventListener('touchend', e => {
     if (touchX === null) return;
     const dx = e.changedTouches[0].clientX - touchX;
-    if (Math.abs(dx) > 40) galShow((state.galleryIdx[apt.id] || 0) + (dx < 0 ? 1 : -1));
+    if (Math.abs(dx) > 40) { swiped = true; galShow((state.galleryIdx[apt.id] || 0) + (dx < 0 ? 1 : -1)); }
     touchX = null;
   }, { passive: true });
+
+  // клик по фото (и кнопка «⤢») — просмотр на весь экран
+  const openLb = () => openLightbox(apt.photos, apt.title, state.galleryIdx[apt.id] || 0, galShow);
+  mainImg.addEventListener('click', () => {
+    if (swiped) { swiped = false; return; } // это был свайп, а не клик
+    openLb();
+  });
+  view.querySelector('[data-galopen]').addEventListener('click', openLb);
 
   const calBox = view.querySelector('#apt-cal');
   const redrawCal = () => renderCalendar(calBox, {
@@ -724,7 +794,7 @@ function injectSchema() {
     '@type': 'LodgingBusiness',
     name: `${SITE.brand} — ${SITE.tagline}`,
     telephone: SITE.phone,
-    email: SITE.email,
+    ...(SITE.email ? { email: SITE.email } : {}),
     address: { '@type': 'PostalAddress', addressLocality: SITE.city, addressCountry: 'RU' },
     checkinTime: SITE.checkIn,
     checkoutTime: SITE.checkOut,
