@@ -995,6 +995,10 @@ function hydrateStatic() {
     el.href = 'https://wa.me/' + SITE.whatsapp + '?text=' + encodeURIComponent(text);
   });
   document.querySelectorAll('[data-href-tg]').forEach(el => { el.href = 'https://t.me/' + SITE.telegram; });
+  document.querySelectorAll('[data-href-sms]').forEach(el => {
+    const text = el.dataset.smsText || `Здравствуйте, ${SITE.ownerName}! Пишу с сайта — есть вопрос по квартирам и датам.`;
+    el.href = 'sms:' + SITE.phoneHref + '?&body=' + encodeURIComponent(text);
+  });
   const yearsEl = document.querySelector('#stat-years');
   if (yearsEl) {
     const years = new Date().getFullYear() - SITE.yearsSince;

@@ -221,6 +221,9 @@ main[hidden] { display: none; }
 .icon-btn:hover { transform: translateY(-2px) scale(1.05); }
 .icon-wa { background: var(--wa); }
 .icon-tg { background: var(--tg); }
+.icon-sms { background: var(--gold); }
+/* кнопки в шапке не должны сжиматься — иначе на узком экране в бургер не попасть */
+.burger, .icon-btn, .wordmark-icon { flex-shrink: 0; }
 
 /* ---------- Hero ---------- */
 .hero { position: relative; min-height: 88vh; display: flex; align-items: center; }
@@ -1031,6 +1034,10 @@ body.is-lightbox { overflow: hidden; }
 @media (max-width: 720px) {
   .header { gap: 12px; }
   .nav { display: none; }
+  /* три иконки связи + бургер: на узких телефонах ужимаем, иначе шапка не влезает */
+  .header-contacts { gap: 7px; }
+  .icon-btn { width: 38px; height: 38px; }
+  .burger { width: 40px; height: 40px; padding: 9px; }
   .burger { display: inline-flex; }
   .mobile-menu { display: flex; }
   .hero { min-height: auto; }
@@ -1061,4 +1068,15 @@ body.is-lightbox { overflow: hidden; }
   body.is-apt-page .apt-sticky { display: flex; }
   body.is-apt-page .footer { padding-bottom: 100px; }
   .apt-page { padding-bottom: 130px; }
+}
+
+/* узкие телефоны: в шапке четыре элемента — логотип, бургер и три иконки связи */
+@media (max-width: 380px) {
+  .header { gap: 8px; padding-left: 12px; padding-right: 12px; }
+  .header-contacts { gap: 4px; }
+  .icon-btn { width: 32px; height: 32px; }
+  .icon-btn svg { width: 16px; height: 16px; }
+  .burger { width: 34px; height: 34px; padding: 8px; }
+  .wordmark { font-size: 17px; gap: 6px; }
+  .wordmark-icon { width: 18px; height: 18px; }
 }
