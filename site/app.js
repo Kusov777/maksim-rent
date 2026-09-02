@@ -99,7 +99,8 @@ const state = {
   heroVersion: 0,      // растёт при каждом изменении дат/гостей на главной
   aptSel: {},          // aptId -> {checkin, checkout, guests, heroV}
   calMonth: {},        // ключ календаря -> смещение первого видимого месяца
-  galleryIdx: {},      // aptId -> индекс текущего фото
+  galleryIdx: {},      // aptId -> индекс текущего фото в карточке квартиры
+  cardIdx: {},         // aptId -> индекс фото в карусели каталога
 };
 
 /* уменьшенная версия фото для карточек и миниатюр */
@@ -303,20 +304,41 @@ function openWhatsApp(apt, sel) {
   const url = 'https://wa.me/' + SITE.whatsapp + '?text=' + encodeURIComponent(bookingMessage(apt, sel));
   window.open(url, '_blank', 'noopener');
 }
+/* Копирование синхронно, прямо в обработчике клика: асинхронный
+   navigator.clipboard после открытия Telegram Safari уже не выполняет */
+function copyToClipboard(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.setAttribute('readonly', '');
+  ta.style.cssText = 'position:fixed;top:-1000px;opacity:0';
+  document.body.appendChild(ta);
+  ta.select();
+  ta.setSelectionRange(0, text.length);
+  let ok = false;
+  try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+  document.body.removeChild(ta);
+  if (!ok && navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).catch(() => {});
+  }
+  return ok;
+}
+function openSms(apt, sel) {
+  track('booking_sms');
+  // «?&body=» — форма, которую понимают и iOS, и Android
+  location.href = 'sms:' + SITE.phoneHref + '?&body=' + encodeURIComponent(bookingMessage(apt, sel));
+}
 function openTelegram(apt, sel) {
   track('booking_telegram');
   const msg = bookingMessage(apt, sel);
   const url = 'https://t.me/' + SITE.telegram;
+  // Telegram не умеет подставлять текст в чат обычного аккаунта (только боты),
+  // поэтому кладём заявку в буфер обмена — гостю остаётся вставить её в поле ввода
+  const copied = copyToClipboard(msg);
   // окно открываем синхронно в обработчике клика — иначе Safari блокирует popup
   const win = window.open(url, '_blank', 'noopener');
-  const short = `${apt.title}, ${fmtShort(sel.checkin)} — ${fmtShort(sel.checkout)}, ${sel.guests} ${guestsWord(sel.guests)}`;
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(msg)
-      .then(() => toast('Заявка скопирована — вставьте её в чат'))
-      .catch(() => toast('Напишите в чате: ' + short));
-  } else {
-    toast('Напишите в чате: ' + short);
-  }
+  toast(copied
+    ? 'Заявка скопирована — вставьте её в чат: долгий тап по полю ввода → «Вставить»'
+    : `Напишите в чате: ${apt.title}, ${fmtShort(sel.checkin)} — ${fmtShort(sel.checkout)}, ${sel.guests} ${guestsWord(sel.guests)}`);
   if (!win) location.href = url;
 }
 
@@ -353,10 +375,20 @@ function renderCatalog() {
       availHtml = '<span class="avail avail-yes">Свободна на ваши даты</span>';
       priceHtml = `<span class="price-num">${fmtMoney(p.total)}</span><span class="price-per"> за ${p.nights} ${nightsWord(p.nights)}</span>`;
     }
+    // карусель прямо в каталоге: индикатор — точки, а если фото много, счётчик
+    const i0 = state.cardIdx[apt.id] || 0;
+    const many = apt.photos.length > 1;
+    const nav = many ? `
+        <button class="card-arrow card-prev" type="button" data-cardnav="-1" aria-label="Предыдущее фото">‹</button>
+        <button class="card-arrow card-next" type="button" data-cardnav="1" aria-label="Следующее фото">›</button>
+        ${apt.photos.length <= 8
+          ? `<div class="card-dots">${apt.photos.map((_, i) => `<i data-carddot class="${i === i0 ? 'is-current' : ''}"></i>`).join('')}</div>`
+          : `<div class="card-count">${i0 + 1} / ${apt.photos.length}</div>`}` : '';
     return `
     <article class="apt-card ${unavailable ? 'is-unavailable' : ''}" data-goto="${apt.id}" tabindex="0" role="link" aria-label="${apt.title} — подробнее">
       <div class="apt-card-photo">
-        <img src="${thumb(apt.photos[0])}" alt="${apt.title} — фото" loading="lazy" onerror="imgFallback(this)">
+        <img src="${thumb(apt.photos[i0])}" alt="${apt.title} — фото ${i0 + 1}" loading="lazy" onerror="imgFallback(this)">
+        ${nav}
         <div class="apt-card-badges">${apt.badges.map(b => `<span class="badge">${b}</span>`).join('')}</div>
         ${availHtml ? `<div class="apt-card-avail">${availHtml}</div>` : ''}
       </div>
@@ -373,9 +405,43 @@ function renderCatalog() {
   }).join('');
 
   grid.querySelectorAll('[data-goto]').forEach(card => {
-    const go = () => { location.hash = '#/apt/' + card.dataset.goto; };
+    const apt = APARTMENTS.find(a => a.id === card.dataset.goto);
+    let swiped = false;
+    const go = () => {
+      if (swiped) { swiped = false; return; } // это был свайп по фото, а не клик
+      location.hash = '#/apt/' + card.dataset.goto;
+    };
     card.addEventListener('click', go);
     card.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+
+    // листание фото, не заходя в квартиру
+    const photo = card.querySelector('.apt-card-photo');
+    const img = photo.querySelector('img');
+    const n = apt.photos.length;
+    const showPhoto = idx => {
+      const i = ((idx % n) + n) % n;
+      state.cardIdx[apt.id] = i;
+      img.src = thumb(apt.photos[i]);
+      img.alt = `${apt.title} — фото ${i + 1}`;
+      photo.querySelectorAll('[data-carddot]').forEach((d, k) => d.classList.toggle('is-current', k === i));
+      const counter = photo.querySelector('.card-count');
+      if (counter) counter.textContent = `${i + 1} / ${n}`;
+      new Image().src = thumb(apt.photos[(i + 1) % n]); // следующее подгружаем заранее
+    };
+    photo.querySelectorAll('[data-cardnav]').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation(); // не открываем карточку квартиры
+        showPhoto((state.cardIdx[apt.id] || 0) + Number(btn.dataset.cardnav));
+      });
+    });
+    let touchX = null;
+    photo.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; swiped = false; }, { passive: true });
+    photo.addEventListener('touchend', e => {
+      if (touchX === null) return;
+      const dx = e.changedTouches[0].clientX - touchX;
+      if (Math.abs(dx) > 40) { swiped = true; showPhoto((state.cardIdx[apt.id] || 0) + (dx < 0 ? 1 : -1)); }
+      touchX = null;
+    }, { passive: true });
   });
 }
 
@@ -561,7 +627,7 @@ function renderAptView(apt) {
       <div class="apt-head">
         <h1 class="apt-title">${apt.title}</h1>
         <p class="apt-sub">${apt.address} · м. ${apt.metro.name}, ${apt.metro.walkMin} мин пешком ·
-          <a href="https://yandex.ru/maps/?ll=${apt.coords[1]},${apt.coords[0]}&z=14&l=map" target="_blank" rel="noopener">район на карте</a></p>
+          <a href="https://yandex.ru/maps/?text=${encodeURIComponent(SITE.city + ', ' + apt.address)}&z=17" target="_blank" rel="noopener">дом на карте</a></p>
       </div>
 
       <div class="gallery">
@@ -630,9 +696,12 @@ function renderAptView(apt) {
             </div>
           </div>
           <div id="apt-booking-summary"></div>
+          <p class="booking-hint">Для бронирования напишите мне в удобный для вас мессенджер —
+            заявка с квартирой, датами и суммой подставится сама.</p>
           <div class="booking-actions">
             <button class="btn btn-wa book-btn" data-book="wa">Написать в WhatsApp</button>
             <button class="btn btn-tg book-btn" data-book="tg">Написать в Telegram</button>
+            <button class="btn btn-sms book-btn" data-book="sms">Написать SMS</button>
             <a class="btn btn-call" data-call href="tel:${SITE.phoneHref}">Позвонить: ${SITE.phone}</a>
           </div>
         </aside>
@@ -737,7 +806,10 @@ function renderAptView(apt) {
         view.querySelector('#apt-booking').scrollIntoView({ behavior: 'smooth', block: 'center' });
         return;
       }
-      btn.dataset.book === 'wa' ? openWhatsApp(apt, sel) : openTelegram(apt, sel);
+      const how = btn.dataset.book;
+      if (how === 'wa') openWhatsApp(apt, sel);
+      else if (how === 'tg') openTelegram(apt, sel);
+      else openSms(apt, sel);
     });
   });
   view.querySelector('[data-call]').addEventListener('click', () => track('booking_call'));

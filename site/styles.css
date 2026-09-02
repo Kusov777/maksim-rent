@@ -105,6 +105,8 @@ main[hidden] { display: none; }
 .btn-wa:hover { background: #0e6b3c; }
 .btn-tg { background: var(--tg); color: #f0faff; }
 .btn-tg:hover { background: #186289; }
+.btn-sms { background: var(--gold); color: #2a1e0c; }
+.btn-sms:hover { background: #a87a34; }
 .btn-ghost { background: transparent; border: 1.5px solid currentColor; }
 .btn-call { background: transparent; border: 1.5px solid var(--hairline); color: var(--ink-soft); }
 .btn-call:hover { border-color: var(--ink-soft); }
@@ -395,6 +397,51 @@ section[id] { scroll-margin-top: 76px; }
 .apt-card-photo { position: relative; aspect-ratio: 4 / 3; overflow: hidden; }
 .apt-card-photo img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
 .apt-card:hover .apt-card-photo img { transform: scale(1.045); }
+/* карусель в карточке каталога */
+.card-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 252, 245, 0.9);
+  color: var(--ink);
+  font-size: 19px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 10px rgba(36, 28, 18, 0.28);
+  opacity: 0;
+  transition: opacity 0.18s ease, background 0.15s ease;
+}
+.apt-card:hover .card-arrow,
+.apt-card:focus-within .card-arrow { opacity: 1; }
+.card-arrow:hover { background: #fff; }
+.card-prev { left: 10px; }
+.card-next { right: 10px; }
+@media (hover: none) { .card-arrow { opacity: 0.92; } }  /* на телефоне наведения нет */
+.card-dots {
+  position: absolute;
+  bottom: 12px; left: 50%;
+  transform: translateX(-50%);
+  display: flex; gap: 6px;
+}
+.card-dots i {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 252, 245, 0.55);
+  box-shadow: 0 1px 3px rgba(24, 17, 9, 0.35);
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+.card-dots i.is-current { background: #fff; transform: scale(1.35); }
+.card-count {
+  position: absolute;
+  bottom: 12px; right: 12px;
+  background: rgba(24, 17, 9, 0.72);
+  color: var(--cream-on-dark);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 999px;
+}
 .apt-card-badges { position: absolute; top: 12px; left: 12px; display: flex; gap: 7px; flex-wrap: wrap; }
 .badge {
   background: rgba(24, 17, 9, 0.72);
@@ -893,7 +940,8 @@ body.is-lightbox { overflow: hidden; }
 .calc-total { font-size: 17px; font-weight: 700; color: var(--ink); border-top: 1px dashed var(--hairline); padding-top: 10px; margin-top: 10px; }
 .calc-note { font-size: 12.5px; color: var(--ink-faint); margin-top: 8px; }
 .calc-hint { font-size: 14px; color: var(--ink-soft); border-top: 1px solid var(--hairline); padding-top: 14px; }
-.booking-actions { display: flex; flex-direction: column; gap: 9px; margin-top: 16px; }
+.booking-hint { font-size: 13.5px; color: var(--ink-soft); margin-top: 14px; }
+.booking-actions { display: flex; flex-direction: column; gap: 9px; margin-top: 12px; }
 
 /* другие квартиры */
 .apt-others { margin-top: 56px; }
