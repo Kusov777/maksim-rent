@@ -120,6 +120,84 @@ function imgFallback(img) {
   if (img.src !== PHOTO_FALLBACK) img.src = PHOTO_FALLBACK;
 }
 
+/* ---------- Лента фото: кадр едет за пальцем ----------
+   Одна механика на три места: каталог, галерея квартиры, полноэкранный просмотр.
+   В ленте всегда три кадра — [data-slide="-1"], "0" и "1"; после перехода
+   соседние перерисовываются, поэтому листать можно бесконечно.
+   opts: { area, track, count(), srcOf(i), index(), onCommit(i), onSwipe? } */
+function swipeTrack(opts) {
+  const norm = i => { const n = opts.count(); return ((i % n) + n) % n; };
+  const slide = d => opts.track.querySelector(`[data-slide="${d}"]`);
+  const prime = () => {                          // соседей грузим только когда они вот-вот понадобятся
+    const i = opts.index();
+    if (!slide(-1).getAttribute('src')) slide(-1).src = opts.srcOf(norm(i - 1));
+    if (!slide(1).getAttribute('src')) slide(1).src = opts.srcOf(norm(i + 1));
+  };
+  const paint = i => {
+    opts.track.style.transition = 'none';
+    opts.track.style.transform = 'translateX(0)';
+    slide(0).src = opts.srcOf(i);
+    slide(-1).src = opts.srcOf(norm(i - 1));
+    slide(1).src = opts.srcOf(norm(i + 1));
+    opts.onCommit(i);
+  };
+  let pending = null;                            // незавершённый переход: {dir, timer}
+  const finish = () => {                         // transitionend не придёт, если сдвига не было
+    if (!pending) return;
+    const dir = pending.dir;
+    clearTimeout(pending.timer);
+    pending = null;
+    if (dir) paint(norm(opts.index() + dir));
+    else opts.track.style.transition = '';
+  };
+  const glide = dir => {                         // dir: 1 вперёд, -1 назад, 0 вернуть на место
+    finish();                                    // предыдущий переход досчитываем сразу
+    prime();
+    void opts.track.offsetWidth;                 // иначе новый переход сольётся с предыдущим и не анимируется
+    opts.track.style.transition = 'transform 0.3s cubic-bezier(0.22, 0.61, 0.36, 1)';
+    opts.track.style.transform = `translateX(${-dir * 100}%)`;
+    pending = { dir, timer: setTimeout(finish, 310) };
+  };
+
+  let startX = null, startY = null, axis = null, dx = 0;
+  opts.area.addEventListener('touchstart', e => {
+    finish();                                    // палец лёг во время перехода — досчитываем его
+    prime();
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+    axis = null;
+    dx = 0;
+    opts.track.style.transition = 'none';
+  }, { passive: true });
+  opts.area.addEventListener('touchmove', e => {
+    if (startX === null) return;
+    const mx = e.touches[0].clientX - startX;
+    const my = e.touches[0].clientY - startY;
+    if (axis === null) {
+      if (Math.abs(mx) < 8 && Math.abs(my) < 8) return;
+      axis = Math.abs(mx) > Math.abs(my) ? 'x' : 'y';
+    }
+    if (axis === 'y') return;                    // палец ведёт страницу, а не ленту
+    e.preventDefault();
+    dx = mx;
+    opts.track.style.transform = `translateX(${dx}px)`;
+  }, { passive: false });
+  const end = () => {
+    if (startX === null) return;
+    if (axis === 'x') {
+      if (Math.abs(dx) > 6 && opts.onSwipe) opts.onSwipe();
+      const far = Math.abs(dx) > (opts.area.clientWidth || 1) * 0.18;
+      glide(far ? (dx < 0 ? 1 : -1) : 0);
+    }
+    startX = startY = null;
+    dx = 0;
+  };
+  opts.area.addEventListener('touchend', end, { passive: true });
+  opts.area.addEventListener('touchcancel', end, { passive: true });
+
+  return { glide, prime, jumpTo: i => { finish(); paint(norm(i)); } };
+}
+
 /* ---------- Календарь ----------
    opts: { key, busyOf(iso)->bool, sel: {checkin, checkout}, onPick(sel), months }  */
 function renderCalendar(container, opts) {
@@ -228,15 +306,8 @@ function toast(msg) {
 }
 
 /* ---------- Полноэкранный просмотр фото ---------- */
-const lb = { el: null, photos: [], idx: 0, onIndex: null, lastFocus: null };
+const lb = { el: null, track: null, photos: [], idx: 0, onIndex: null, lastFocus: null, swipedAt: 0 };
 
-function lbShow(idx) {
-  const n = lb.photos.length;
-  lb.idx = ((idx % n) + n) % n;
-  lb.el.querySelector('.lightbox-img').src = lb.photos[lb.idx];
-  lb.el.querySelector('.lightbox-count').textContent = `${lb.idx + 1} / ${n}`;
-  if (lb.onIndex) lb.onIndex(lb.idx);
-}
 function lbClose() {
   lb.el.classList.remove('is-open');
   document.body.classList.remove('is-lightbox');
@@ -250,41 +321,55 @@ function openLightbox(photos, title, startIdx, onIndex) {
     lb.el.setAttribute('aria-modal', 'true');
     lb.el.setAttribute('aria-label', 'Просмотр фото');
     lb.el.innerHTML =
-      '<img class="lightbox-img" alt="">' +
+      '<div class="lightbox-stage"><div class="lightbox-track">' +
+      '<img class="lightbox-slide" data-slide="0" alt="">' +
+      '<img class="lightbox-slide" data-slide="-1" alt="" aria-hidden="true">' +
+      '<img class="lightbox-slide" data-slide="1" alt="" aria-hidden="true">' +
+      '</div></div>' +
       '<button class="lightbox-close" type="button" aria-label="Закрыть просмотр">×</button>' +
       '<button class="lightbox-arrow lightbox-prev" type="button" aria-label="Предыдущее фото">‹</button>' +
       '<button class="lightbox-arrow lightbox-next" type="button" aria-label="Следующее фото">›</button>' +
       '<div class="lightbox-count"></div>';
     document.body.appendChild(lb.el);
-    const lbImg = lb.el.querySelector('.lightbox-img');
+    const lbImg = lb.el.querySelector('[data-slide="0"]');
     lbImg.addEventListener('error', () => imgFallback(lbImg));
+    lb.track = swipeTrack({
+      area: lb.el,
+      track: lb.el.querySelector('.lightbox-track'),
+      count: () => lb.photos.length,
+      srcOf: i => lb.photos[i],
+      index: () => lb.idx,
+      onSwipe: () => { lb.swipedAt = performance.now(); },
+      onCommit: i => {
+        lb.idx = i;
+        lb.el.querySelector('.lightbox-count').textContent = `${i + 1} / ${lb.photos.length}`;
+        if (lb.onIndex) lb.onIndex(i);
+      },
+    });
     lb.el.querySelector('.lightbox-close').addEventListener('click', lbClose);
-    lb.el.querySelector('.lightbox-prev').addEventListener('click', () => lbShow(lb.idx - 1));
-    lb.el.querySelector('.lightbox-next').addEventListener('click', () => lbShow(lb.idx + 1));
-    // клик мимо фото закрывает просмотр
-    lb.el.addEventListener('click', e => { if (e.target === lb.el || e.target === lbImg) lbClose(); });
+    lb.el.querySelector('.lightbox-prev').addEventListener('click', () => lb.track.glide(-1));
+    lb.el.querySelector('.lightbox-next').addEventListener('click', () => lb.track.glide(1));
+    // клик мимо кнопок закрывает просмотр, но свайп кликом не считаем
+    lb.el.addEventListener('click', e => {
+      if (e.target.closest('button')) return;
+      if (performance.now() - lb.swipedAt < 400) return;
+      lbClose();
+    });
     document.addEventListener('keydown', e => {
       if (!lb.el.classList.contains('is-open')) return;
       if (e.key === 'Escape') lbClose();
-      else if (e.key === 'ArrowLeft') lbShow(lb.idx - 1);
-      else if (e.key === 'ArrowRight') lbShow(lb.idx + 1);
+      else if (e.key === 'ArrowLeft') lb.track.glide(-1);
+      else if (e.key === 'ArrowRight') lb.track.glide(1);
     });
-    let tx = null;
-    lb.el.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, { passive: true });
-    lb.el.addEventListener('touchend', e => {
-      if (tx === null) return;
-      const dx = e.changedTouches[0].clientX - tx;
-      if (Math.abs(dx) > 40) lbShow(lb.idx + (dx < 0 ? 1 : -1));
-      tx = null;
-    }, { passive: true });
   }
   lb.photos = photos;
-  lb.onIndex = onIndex || null;
+  lb.onIndex = null;                     // при первой отрисовке галерею не дёргаем
   lb.lastFocus = document.activeElement;
-  lb.el.querySelector('.lightbox-img').alt = `${title} — фото`;
+  lb.el.querySelector('[data-slide="0"]').alt = `${title} — фото`;
   lb.el.classList.add('is-open');
   document.body.classList.add('is-lightbox');
-  lbShow(startIdx || 0);
+  lb.track.jumpTo(startIdx || 0);
+  lb.onIndex = onIndex || null;
   lb.el.querySelector('.lightbox-close').focus();
 }
 
@@ -421,91 +506,32 @@ function renderCatalog() {
     card.addEventListener('click', go);
     card.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
 
-    // листание фото, не заходя в квартиру: лента из трёх кадров едет за пальцем
+    // листание фото, не заходя в квартиру
     const photo = card.querySelector('.apt-card-photo');
     const n = apt.photos.length;
     if (n < 2) return;
-    const track = photo.querySelector('.card-track');
-    const slide = d => photo.querySelector(`[data-slide="${d}"]`);
-    const at = i => thumb(apt.photos[((i % n) + n) % n]);
-    const cur = () => state.cardIdx[apt.id] || 0;
-
-    const primeNeighbours = () => {
-      if (!slide(-1).getAttribute('src')) slide(-1).src = at(cur() - 1);
-      if (!slide(1).getAttribute('src')) slide(1).src = at(cur() + 1);
-    };
-    const commit = dir => {
-      const i = ((cur() + dir) % n + n) % n;
-      state.cardIdx[apt.id] = i;
-      track.style.transition = 'none';
-      track.style.transform = 'translateX(0)';
-      slide(0).src = at(i);
-      slide(0).alt = `${apt.title} — фото ${i + 1}`;
-      slide(-1).src = at(i - 1);
-      slide(1).src = at(i + 1);
-      photo.querySelectorAll('[data-carddot]').forEach((d, k) => d.classList.toggle('is-current', k === i));
-      const counter = photo.querySelector('.card-count');
-      if (counter) counter.textContent = `${i + 1} / ${n}`;
-    };
-    let pending = null;                          // незавершённый переход: {dir, timer}
-    const finish = () => {                       // transitionend не придёт, если сдвига не было
-      if (!pending) return;
-      clearTimeout(pending.timer);
-      if (pending.dir) commit(pending.dir); else track.style.transition = '';
-      pending = null;
-    };
-    const glide = dir => {                       // dir: 1 вперёд, -1 назад, 0 вернуть на место
-      finish();                                  // предыдущий переход досчитываем сразу
-      primeNeighbours();
-      void track.offsetWidth;                    // чтобы новый переход анимировался, а не слился с предыдущим
-      track.style.transition = 'transform 0.3s cubic-bezier(0.22, 0.61, 0.36, 1)';
-      track.style.transform = `translateX(${-dir * 100}%)`;
-      pending = { dir, timer: setTimeout(finish, 310) };
-    };
-
+    const carousel = swipeTrack({
+      area: photo,
+      track: photo.querySelector('.card-track'),
+      count: () => n,
+      srcOf: i => thumb(apt.photos[i]),
+      index: () => state.cardIdx[apt.id] || 0,
+      onSwipe: () => { swipedAt = performance.now(); },
+      onCommit: i => {
+        state.cardIdx[apt.id] = i;
+        photo.querySelector('[data-slide="0"]').alt = `${apt.title} — фото ${i + 1}`;
+        photo.querySelectorAll('[data-carddot]').forEach((d, k) => d.classList.toggle('is-current', k === i));
+        const counter = photo.querySelector('.card-count');
+        if (counter) counter.textContent = `${i + 1} / ${n}`;
+      },
+    });
     photo.querySelectorAll('[data-cardnav]').forEach(btn => {
       btn.addEventListener('click', e => {
         e.stopPropagation();                      // не открываем карточку квартиры
-        glide(Number(btn.dataset.cardnav));
+        carousel.glide(Number(btn.dataset.cardnav));
       });
     });
-    card.addEventListener('mouseenter', primeNeighbours);
-
-    let startX = null, startY = null, axis = null, dx = 0;
-    photo.addEventListener('touchstart', e => {
-      finish();                                  // палец лёг во время перехода — досчитываем его
-      primeNeighbours();
-      startX = e.touches[0].clientX;
-      startY = e.touches[0].clientY;
-      axis = null;
-      dx = 0;
-      track.style.transition = 'none';
-    }, { passive: true });
-    photo.addEventListener('touchmove', e => {
-      if (startX === null) return;
-      const mx = e.touches[0].clientX - startX;
-      const my = e.touches[0].clientY - startY;
-      if (axis === null) {
-        if (Math.abs(mx) < 8 && Math.abs(my) < 8) return;
-        axis = Math.abs(mx) > Math.abs(my) ? 'x' : 'y';
-      }
-      if (axis === 'y') return;                   // палец ведёт страницу, а не карусель
-      e.preventDefault();
-      dx = mx;
-      track.style.transform = `translateX(${dx}px)`;
-    }, { passive: false });
-    const endTouch = () => {
-      if (startX === null) return;
-      if (axis === 'x') {
-        if (Math.abs(dx) > 6) swipedAt = performance.now();  // это жест, а не клик по карточке
-        const far = Math.abs(dx) > (photo.clientWidth || 1) * 0.18;
-        glide(far ? (dx < 0 ? 1 : -1) : 0);
-      }
-      startX = startY = null;
-      dx = 0;
-    };
-    photo.addEventListener('touchend', endTouch, { passive: true });
-    photo.addEventListener('touchcancel', endTouch, { passive: true });
+    card.addEventListener('mouseenter', carousel.prime);
   });
 }
 
@@ -696,7 +722,11 @@ function renderAptView(apt) {
 
       <div class="gallery">
         <div class="gallery-main">
-          <img id="gallery-img" src="${apt.photos[gIdx]}" alt="${apt.title} — фото ${gIdx + 1}" onerror="imgFallback(this)">
+          <div class="gallery-track">
+            <img id="gallery-img" class="gallery-slide" data-slide="0" src="${apt.photos[gIdx]}" alt="${apt.title} — фото ${gIdx + 1}" onerror="imgFallback(this)">
+            <img class="gallery-slide" data-slide="-1" alt="" aria-hidden="true">
+            <img class="gallery-slide" data-slide="1" alt="" aria-hidden="true">
+          </div>
           <button class="gallery-arrow gallery-prev" data-gal="-1" aria-label="Предыдущее фото">‹</button>
           <button class="gallery-arrow gallery-next" data-gal="1" aria-label="Следующее фото">›</button>
           <button class="gallery-zoom" type="button" data-galopen aria-label="Открыть фото на весь экран">⤢</button>
@@ -803,38 +833,36 @@ function renderAptView(apt) {
   /* — обработчики — */
   view.querySelector('[data-back]').addEventListener('click', () => { location.hash = '#/'; });
 
-  // точечное обновление галереи — без перерисовки всей страницы
-  const galShow = idx => {
-    const n = apt.photos.length;
-    const i = ((idx % n) + n) % n;
-    state.galleryIdx[apt.id] = i;
-    const img = view.querySelector('#gallery-img');
-    img.src = apt.photos[i];
-    img.alt = `${apt.title} — фото ${i + 1}`;
-    view.querySelector('.gallery-count').textContent = `${i + 1} / ${n}`;
-    view.querySelectorAll('[data-galto]').forEach((t, k) => {
-      t.classList.toggle('is-current', k === i);
-      if (k === i) t.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
-    });
-  };
+  // галерея: кадр едет за пальцем, страница при этом не перерисовывается
+  const stage = view.querySelector('.gallery-main');
+  let gallerySwipedAt = 0;
+  const gallery = swipeTrack({
+    area: stage,
+    track: view.querySelector('.gallery-track'),
+    count: () => apt.photos.length,
+    srcOf: i => apt.photos[i],
+    index: () => state.galleryIdx[apt.id] || 0,
+    onSwipe: () => { gallerySwipedAt = performance.now(); },
+    onCommit: i => {
+      state.galleryIdx[apt.id] = i;
+      view.querySelector('#gallery-img').alt = `${apt.title} — фото ${i + 1}`;
+      view.querySelector('.gallery-count').textContent = `${i + 1} / ${apt.photos.length}`;
+      view.querySelectorAll('[data-galto]').forEach((t, k) => {
+        t.classList.toggle('is-current', k === i);
+        if (k === i) t.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
+      });
+    },
+  });
   view.querySelectorAll('[data-gal]').forEach(b =>
-    b.addEventListener('click', () => galShow((state.galleryIdx[apt.id] || 0) + Number(b.dataset.gal))));
+    b.addEventListener('click', () => gallery.glide(Number(b.dataset.gal))));
   view.querySelectorAll('[data-galto]').forEach(t =>
-    t.addEventListener('click', () => galShow(Number(t.dataset.galto))));
-  const mainImg = view.querySelector('#gallery-img');
-  let touchX = null, swiped = false;
-  mainImg.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; swiped = false; }, { passive: true });
-  mainImg.addEventListener('touchend', e => {
-    if (touchX === null) return;
-    const dx = e.changedTouches[0].clientX - touchX;
-    if (Math.abs(dx) > 40) { swiped = true; galShow((state.galleryIdx[apt.id] || 0) + (dx < 0 ? 1 : -1)); }
-    touchX = null;
-  }, { passive: true });
+    t.addEventListener('click', () => gallery.jumpTo(Number(t.dataset.galto))));
 
   // клик по фото (и кнопка «⤢») — просмотр на весь экран
-  const openLb = () => openLightbox(apt.photos, apt.title, state.galleryIdx[apt.id] || 0, galShow);
-  mainImg.addEventListener('click', () => {
-    if (swiped) { swiped = false; return; } // это был свайп, а не клик
+  const openLb = () => openLightbox(apt.photos, apt.title, state.galleryIdx[apt.id] || 0, i => gallery.jumpTo(i));
+  stage.addEventListener('click', e => {
+    if (e.target.closest('button')) return;                     // это стрелка или «⤢»
+    if (performance.now() - gallerySwipedAt < 400) return;      // это был свайп, а не клик
     openLb();
   });
   view.querySelector('[data-galopen]').addEventListener('click', openLb);
