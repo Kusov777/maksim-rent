@@ -386,6 +386,7 @@ section[id] { scroll-margin-top: 76px; }
   padding: 18px 22px;
 }
 .catalog-banner p { font-size: 15.5px; font-weight: 500; }
+.catalog-banner-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .apt-card {
   background: var(--card);
   border-radius: var(--radius);
@@ -631,6 +632,7 @@ section[id] { scroll-margin-top: 76px; }
 }
 .docs-list b { color: #fff; }
 .business-note { font-size: 14.5px; color: var(--gold) !important; margin-bottom: 24px; }
+.business-actions { display: flex; gap: 12px; flex-wrap: wrap; }
 
 /* ---------- FAQ ---------- */
 .section-faq .section-head { margin-bottom: 26px; }

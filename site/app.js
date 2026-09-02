@@ -441,7 +441,11 @@ function renderCatalog() {
     const askText = `Здравствуйте, ${SITE.ownerName}! На сайте с ${fmtLong(state.heroSel.checkin)} по ${fmtLong(state.heroSel.checkout)} всё занято — подскажете варианты рядом с этими датами?`;
     banner = `<div class="catalog-banner">
       <p>На ${fmtShort(state.heroSel.checkin)} — ${fmtShort(state.heroSel.checkout)} всё занято. Напишите мне — предложу соседние свободные даты.</p>
-      <a class="btn btn-wa btn-sm" href="https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(askText)}" target="_blank" rel="noopener">Спросить в WhatsApp</a>
+      <div class="catalog-banner-actions">
+        <a class="btn btn-wa btn-sm" href="https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(askText)}" target="_blank" rel="noopener">Спросить в WhatsApp</a>
+        <a class="btn btn-tg btn-sm" href="https://t.me/${SITE.telegram}" target="_blank" rel="noopener">В Telegram</a>
+        <a class="btn btn-sms btn-sm" href="sms:${SITE.phoneHref}?&body=${encodeURIComponent(askText)}">SMS</a>
+      </div>
     </div>`;
   }
 

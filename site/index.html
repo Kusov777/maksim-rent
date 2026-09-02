@@ -23,7 +23,8 @@
   <!-- Яндекс.Метрика: когда Максим заведёт счётчик, вставить сюда стандартный сниппет
        и прописать его номер в data.js → SITE.metrikaId. Цели уже размечены в коде:
        booking_whatsapp, booking_telegram, booking_sms, booking_call,
-       header_whatsapp, header_telegram, header_sms, header_call -->
+       header_whatsapp, header_telegram, header_sms, header_call,
+       menu_*, host_*, business_*, cta_*, footer_* — по тем же трём каналам -->
 </head>
 <body>
 
@@ -50,6 +51,9 @@
       <a href="#faq">Вопросы</a>
       <div class="mobile-menu-contacts">
         <a data-href-tel data-track="menu_call" href="#">Позвонить: <span data-site="phone"></span></a>
+        <a data-href-wa data-track="menu_whatsapp" href="#" target="_blank" rel="noopener">Написать в WhatsApp</a>
+        <a data-href-tg data-track="menu_telegram" href="#" target="_blank" rel="noopener">Написать в Telegram</a>
+        <a data-href-sms data-track="menu_sms" href="#">Написать SMS</a>
         <span>На связи <span data-site="workHours"></span></span>
       </div>
     </nav>
@@ -170,6 +174,7 @@
           <div class="host-actions">
             <a class="btn btn-wa" data-href-wa data-track="host_whatsapp" href="#" target="_blank" rel="noopener">Задать вопрос в WhatsApp</a>
             <a class="btn btn-ghost" data-href-tg data-track="host_telegram" href="#" target="_blank" rel="noopener">Или в Telegram</a>
+            <a class="btn btn-sms" data-href-sms data-track="host_sms" href="#">Написать SMS</a>
           </div>
         </div>
       </div>
@@ -199,7 +204,11 @@
             <li><b>Акт</b> — по запросу, если требует ваша форма отчётности</li>
           </ul>
           <p class="business-note">Оплата переводом или наличными — документы для отчёта в любом случае. Нужен счёт на организацию — обсудим, напишите.</p>
-          <a class="btn btn-accent" data-href-wa data-wa-text="Здравствуйте, Максим! Я в командировку — расскажите, какие отчётные документы вы выдаёте и как оформляется бронь." data-track="business_whatsapp" href="#" target="_blank" rel="noopener">Уточнить по документам</a>
+          <div class="business-actions">
+            <a class="btn btn-accent" data-href-wa data-wa-text="Здравствуйте, Максим! Я в командировку — расскажите, какие отчётные документы вы выдаёте и как оформляется бронь." data-track="business_whatsapp" href="#" target="_blank" rel="noopener">Уточнить в WhatsApp</a>
+            <a class="btn btn-tg" data-href-tg data-track="business_telegram" href="#" target="_blank" rel="noopener">В Telegram</a>
+            <a class="btn btn-sms" data-href-sms data-sms-text="Здравствуйте, Максим! Я в командировку — расскажите, какие отчётные документы вы выдаёте и как оформляется бронь." data-track="business_sms" href="#">SMS</a>
+          </div>
         </div>
       </div>
     </section>
@@ -221,6 +230,7 @@
         <div class="cta-actions">
           <a class="btn btn-wa" data-href-wa data-track="cta_whatsapp" href="#" target="_blank" rel="noopener">Написать в WhatsApp</a>
           <a class="btn btn-tg" data-href-tg data-track="cta_telegram" href="#" target="_blank" rel="noopener">Написать в Telegram</a>
+          <a class="btn btn-sms" data-href-sms data-track="cta_sms" href="#">Написать SMS</a>
           <a class="btn btn-ghost" data-href-tel data-track="cta_call" href="#">Позвонить</a>
         </div>
       </div>
@@ -252,6 +262,7 @@
         <a data-href-tel data-track="footer_call" href="#"><span data-site="phone"></span></a>
         <a data-href-wa data-track="footer_whatsapp" href="#" target="_blank" rel="noopener">WhatsApp</a>
         <a data-href-tg data-track="footer_telegram" href="#" target="_blank" rel="noopener">Telegram</a>
+        <a data-href-sms data-track="footer_sms" href="#">SMS</a>
         <span data-site="workHours"></span>
       </div>
       <div class="footer-col footer-legal">
